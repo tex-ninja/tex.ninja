@@ -98,7 +98,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   // Override the current require with this new one
   return newRequire;
-})({20:[function(require,module,exports) {
+})({19:[function(require,module,exports) {
 var define;
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -563,7 +563,7 @@ var define;
 
 }))
 
-},{}],19:[function(require,module,exports) {
+},{}],17:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const moo = require("moo");
@@ -748,7 +748,7 @@ function texDown(markDown, ...renderers) {
 }
 exports.texDown = texDown;
 
-},{"moo":20}],22:[function(require,module,exports) {
+},{"moo":19}],21:[function(require,module,exports) {
 var define;
 var global = arguments[3];
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -18266,7 +18266,7 @@ module.exports = {"name":"katex","version":"0.10.0-alpha","description":"Fast ma
 /***/ })
 /******/ ])["default"];
 });
-},{}],12:[function(require,module,exports) {
+},{}],9:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -18295,7 +18295,7 @@ function debounce(f, timeout) {
     };
 }
 exports.debounce = debounce;
-},{}],21:[function(require,module,exports) {
+},{}],20:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18358,7 +18358,7 @@ var AbstractRenderer = function () {
 }();
 
 exports.AbstractRenderer = AbstractRenderer;
-},{"./util":12}],9:[function(require,module,exports) {
+},{"./util":9}],6:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18506,7 +18506,7 @@ var Html = function (_AbstractRenderer_1$A) {
 }(AbstractRenderer_1.AbstractRenderer);
 
 exports.Html = Html;
-},{"katex":22,"./AbstractRenderer":21,"./util":12}],10:[function(require,module,exports) {
+},{"katex":21,"./AbstractRenderer":20,"./util":9}],7:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18661,7 +18661,7 @@ var Syntax = function (_AbstractRenderer_1$A) {
 }(AbstractRenderer_1.AbstractRenderer);
 
 exports.Syntax = Syntax;
-},{"./AbstractRenderer":21,"./util":12}],11:[function(require,module,exports) {
+},{"./AbstractRenderer":20,"./util":9}],8:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -18741,7 +18741,7 @@ function sync(e1, e2) {
     e2.addEventListener('scroll', e2OnScroll);
 }
 exports.sync = sync;
-},{"./util":12}],13:[function(require,module,exports) {
+},{"./util":9}],10:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -18800,7 +18800,7 @@ document.addEventListener('DOMContentLoaded', function () {
     update();
     editor.focus();
 });
-},{"texdown":19,"./Html":9,"./Syntax":10,"./sync":11,"./util":12,"./welcome":13}],23:[function(require,module,exports) {
+},{"texdown":17,"./Html":6,"./Syntax":7,"./sync":8,"./util":9,"./welcome":10}],22:[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 
@@ -18829,7 +18829,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = '' || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + '46627' + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + '38507' + '/');
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
@@ -18970,5 +18970,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.parcelRequire, id);
   });
 }
-},{}]},{},[23,3], null)
+},{}]},{},[22,3], null)
 //# sourceMappingURL=/js.234a2646.map
