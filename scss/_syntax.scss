@@ -1,0 +1,144 @@
+$color-special-char: orange;
+$color-env: darkred;
+$color-math: turquoise;
+$color-link: blue;
+$color-img: coral;
+$color-tikz: darkgreen;
+// 
+[data-type],
+div.line {
+    display: block;
+    white-space: pre-wrap;
+}
+
+[data-type=''],
+[data-type='b'],
+[data-type='i'],
+[data-type='u'],
+[data-type='a'],
+[data-type='img'],
+[data-type='$'] {
+    display: inline;
+}
+
+[data-type='p'],
+[data-type='$$'] {
+    white-space: pre-wrap;
+}
+
+[data-type^='h'] {
+    color: black;
+    &::before {
+        font-weight: bold;
+        color: $color-special-char;
+    }
+}
+
+[data-type='ol'] {
+    counter-reset: ol;
+    [data-type='li']>*:first-child::before {
+        counter-increment: ol;
+        content: counter(ol) '. ';
+        color: $color-special-char;
+    }
+}
+
+[data-type='ul'] {
+    [data-type='li']>*:first-child::before {
+        content: '- ';
+        color: $color-special-char;
+    }
+}
+
+[data-type='$'] {
+    &::before,
+    &::after {
+        content: '$';
+        color: $color-special-char;
+    }
+}
+
+[data-type='$$'] {
+    &::before,
+    &::after {
+        content: '$$';
+        color: $color-special-char;
+    }
+}
+
+[data-type='$'],
+[data-type='$$'] {
+    color: $color-math;
+}
+
+[data-type='tikz'] {
+    color: $color-tikz;
+}
+
+[data-type='cmd'] {
+    color: $color-env;
+}
+
+[data-type='env'] {
+    color: $color-env;
+    &.end {
+        text-decoration: line-through;
+    }
+}
+
+[data-type='a'] {
+    color: $color-link;
+}
+
+[data-type='img'] {
+    color: $color-img;
+}
+
+[data-type='h1']::before {
+    content: '# ';
+}
+
+[data-type='h2']::before {
+    content: '## ';
+}
+
+[data-type='h3']::before {
+    content: '### ';
+}
+
+[data-type='h4']::before {
+    content: '#### ';
+}
+
+[data-type='h5']::before {
+    content: '##### ';
+}
+
+[data-type='h6']::before {
+    content: '###### ';
+}
+
+[data-type='b'] {
+    color: black;
+    &::before,
+    &::after {
+        content: '*';
+        color: black;
+    }
+}
+
+[data-type='i'] {
+    font-style: italic;
+    &::before,
+    &::after {
+        content: '/';
+    }
+}
+
+[data-type='u'] {
+    text-decoration: underline;
+    &::before,
+    &::after {
+        content: '_';
+    }
+}

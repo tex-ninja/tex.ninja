@@ -1,0 +1,27 @@
+textarea#input,
+#editor {
+    font-family: 'Courier New', Courier, monospace;
+    margin: 0;
+    display: block;
+    font-size: inherit;
+    outline: none;
+    border: none;
+    height: 100%;
+    width: 100%;
+}
+
+textarea#input {
+    position: relative;
+    z-index: 5;
+    resize: none;
+    opacity: .5;
+    overflow: hidden;
+}
+
+#editor {
+    color: #888;
+    position: absolute;
+    left: 0;
+    z-index: 0;
+    overflow: visible;
+}

@@ -1,0 +1,11 @@
+#content {
+    width: 21cm;
+    margin: 1em auto;
+}
+
+@media print {
+    html,
+    body {
+        width: 21cm;
+    }
+}

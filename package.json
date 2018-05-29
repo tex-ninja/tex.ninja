@@ -1,15 +1,21 @@
 {
-  "name": "tex.ninja",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "webpack": "^4.5.0",
-    "webpack-cli": "^2.0.14"
-  }
+    "name": "tex.ninja",
+    "version": "1.0.0",
+    "description": "Write TeX like a Ninja",
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:tex-ninja/tex.ninja.git"
+    },
+    "main": "index.js",
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/katex": "^0.5.0",
+        "@types/moo": "^0.4.0"
+    },
+    "dependencies": {
+        "katex": "^0.10.0-alpha",
+        "texdown": "^1.1.4"
+    },
+    "scripts": {}
 }
