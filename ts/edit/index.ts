@@ -1,9 +1,9 @@
 import { texDown } from 'texdown';
-import { Html } from './Html';
-import { Syntax } from './Syntax';
-import { sync } from './sync';
-import { readHash } from './util';
-import { welcome } from './welcome';
+import { Html } from '../Html';
+import { Syntax } from '../Syntax';
+import { sync } from '../sync';
+import { readHash } from '../util';
+import { welcome } from '../welcome';
 
 document.addEventListener('DOMContentLoaded', () => {
     const get = (id: string) => document.getElementById(id)

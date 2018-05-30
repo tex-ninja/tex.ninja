@@ -11,8 +11,7 @@
     "license": "ISC",
     "devDependencies": {
         "@types/katex": "^0.5.0",
-        "@types/moo": "^0.4.0",
-        "parcel-plugin-clean-dist": "0.0.6"
+        "@types/moo": "^0.4.0"
     },
     "dependencies": {
         "katex": "^0.10.0-alpha",

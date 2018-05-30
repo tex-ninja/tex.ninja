@@ -21,7 +21,7 @@ $$
 ## Image
 
 \\center
-![](ninja.png)
+![](https://goo.gl/Lm4Qfc)
 
 \\begin{tikzpicture}
 
