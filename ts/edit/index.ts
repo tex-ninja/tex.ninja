@@ -49,10 +49,9 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.hash = encodeURIComponent(input.value)
     })
 
-    window.onhashchange = update
-
     if (window.location.hash.length <= 1)
         window.location.hash = welcome
+
 
     sync(
         get('lcol') as HTMLElement
@@ -60,7 +59,9 @@ document.addEventListener('DOMContentLoaded', () => {
     )
 
     input.value = readHash()
-    update()
     editor.focus()
+
+    window.onhashchange = update
+    update()
 })
 
