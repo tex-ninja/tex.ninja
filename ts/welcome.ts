@@ -18,10 +18,10 @@ $$
 \\int \\frac{1}{x}\\;dx = \\ln|x| + C
 $$
 
-## Image
+## Images
 
 \\center
-![](https://goo.gl/Lm4Qfc)
+![](https://goo.gl/22sw2D)
 
 \\begin{tikzpicture}
 
