@@ -76,7 +76,7 @@ export class Html extends AbstractRenderer {
 
 
     $(tex: string, id: number) {
-        const span = e('span')
+        const span = e('span', { dir: 'ltr' })
         katex.render(tex, span, {
             throwOnError: false
         })
@@ -85,7 +85,7 @@ export class Html extends AbstractRenderer {
     }
 
     $$(tex: string, id: number) {
-        const span = e('span')
+        const span = e('span', { dir: 'ltr' })
         katex.render(tex, span, {
             throwOnError: false
             , displayMode: true

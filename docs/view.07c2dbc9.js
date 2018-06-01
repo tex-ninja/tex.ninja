@@ -98,7 +98,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   // Override the current require with this new one
   return newRequire;
-})({216:[function(require,module,exports) {
+})({86:[function(require,module,exports) {
 var define;
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -563,7 +563,7 @@ var define;
 
 }))
 
-},{}],210:[function(require,module,exports) {
+},{}],85:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const moo = require("moo");
@@ -748,7 +748,7 @@ function texDown(markDown, ...renderers) {
 }
 exports.texDown = texDown;
 
-},{"moo":216}],214:[function(require,module,exports) {
+},{"moo":86}],87:[function(require,module,exports) {
 var define;
 var global = arguments[3];
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -18266,7 +18266,7 @@ module.exports = {"name":"katex","version":"0.10.0-alpha","description":"Fast ma
 /***/ })
 /******/ ])["default"];
 });
-},{}],209:[function(require,module,exports) {
+},{}],78:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -18295,7 +18295,7 @@ function debounce(f, timeout) {
     };
 }
 exports.debounce = debounce;
-},{}],215:[function(require,module,exports) {
+},{}],88:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18358,7 +18358,7 @@ var AbstractRenderer = function () {
 }();
 
 exports.AbstractRenderer = AbstractRenderer;
-},{"./util":209}],208:[function(require,module,exports) {
+},{"./util":78}],75:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18475,7 +18475,7 @@ var Html = function (_AbstractRenderer_1$A) {
     }, {
         key: "$",
         value: function $(tex, id) {
-            var span = util_1.e('span');
+            var span = util_1.e('span', { dir: 'ltr' });
             katex.render(tex, span, {
                 throwOnError: false
             });
@@ -18485,7 +18485,7 @@ var Html = function (_AbstractRenderer_1$A) {
     }, {
         key: "$$",
         value: function $$(tex, id) {
-            var span = util_1.e('span');
+            var span = util_1.e('span', { dir: 'ltr' });
             katex.render(tex, span, {
                 throwOnError: false,
                 displayMode: true
@@ -18509,7 +18509,7 @@ var Html = function (_AbstractRenderer_1$A) {
 }(AbstractRenderer_1.AbstractRenderer);
 
 exports.Html = Html;
-},{"katex":214,"./AbstractRenderer":215,"./util":209}],20:[function(require,module,exports) {
+},{"katex":87,"./AbstractRenderer":88,"./util":78}],10:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -18522,5 +18522,5 @@ document.addEventListener('DOMContentLoaded', function () {
     texdown_1.texDown(util_1.readHash() + '\n', html);
     content.appendChild(html.root);
 });
-},{"texdown":210,"../Html":208,"../util":209}]},{},[20], null)
-//# sourceMappingURL=/view.1f22cf5a.map
+},{"texdown":85,"../Html":75,"../util":78}]},{},[10], null)
+//# sourceMappingURL=/view.07c2dbc9.map
