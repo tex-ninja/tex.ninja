@@ -98,7 +98,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   // Override the current require with this new one
   return newRequire;
-})({33:[function(require,module,exports) {
+})({19:[function(require,module,exports) {
 var define;
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -563,7 +563,7 @@ var define;
 
 }))
 
-},{}],30:[function(require,module,exports) {
+},{}],17:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const moo = require("moo");
@@ -748,7 +748,7 @@ function texDown(markDown, ...renderers) {
 }
 exports.texDown = texDown;
 
-},{"moo":33}],32:[function(require,module,exports) {
+},{"moo":19}],20:[function(require,module,exports) {
 var define;
 var global = arguments[3];
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -18266,7 +18266,7 @@ module.exports = {"name":"katex","version":"0.10.0-alpha","description":"Fast ma
 /***/ })
 /******/ ])["default"];
 });
-},{}],26:[function(require,module,exports) {
+},{}],12:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -18295,7 +18295,7 @@ function debounce(f, timeout) {
     };
 }
 exports.debounce = debounce;
-},{}],31:[function(require,module,exports) {
+},{}],18:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18358,7 +18358,7 @@ var AbstractRenderer = function () {
 }();
 
 exports.AbstractRenderer = AbstractRenderer;
-},{"./util":26}],25:[function(require,module,exports) {
+},{"./util":12}],11:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18382,8 +18382,10 @@ var Html = function (_AbstractRenderer_1$A) {
 
         var _this = _possibleConstructorReturn(this, (Html.__proto__ || Object.getPrototypeOf(Html)).apply(this, arguments));
 
-        _this.tikzImg = util_1.debounce(function (tikz, img) {
-            img.src = "https://tikz.men/" + encodeURIComponent(tikz);
+        _this.tikzCache = new Set();
+        _this.tikzImg = util_1.debounce(function (src, img) {
+            img.src = src;
+            _this.tikzCache.add(src);
         }, 2000);
         return _this;
     }
@@ -18498,7 +18500,8 @@ var Html = function (_AbstractRenderer_1$A) {
             img.alt = 'Generating tikz...';
             this.top().appendChild(img);
             this.sync(img, id);
-            this.tikzImg(_tikz, img);
+            var src = "https://tikz.men/" + encodeURIComponent(_tikz);
+            if (this.tikzCache.has(src)) img.src = src;else this.tikzImg(src, img);
         }
     }]);
 
@@ -18506,18 +18509,299 @@ var Html = function (_AbstractRenderer_1$A) {
 }(AbstractRenderer_1.AbstractRenderer);
 
 exports.Html = Html;
-},{"katex":32,"./AbstractRenderer":31,"./util":26}],21:[function(require,module,exports) {
+},{"katex":20,"./AbstractRenderer":18,"./util":12}],13:[function(require,module,exports) {
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var AbstractRenderer_1 = require("./AbstractRenderer");
+var util_1 = require("./util");
+
+var Syntax = function (_AbstractRenderer_1$A) {
+    _inherits(Syntax, _AbstractRenderer_1$A);
+
+    function Syntax() {
+        _classCallCheck(this, Syntax);
+
+        return _possibleConstructorReturn(this, (Syntax.__proto__ || Object.getPrototypeOf(Syntax)).apply(this, arguments));
+    }
+
+    _createClass(Syntax, [{
+        key: "cmd",
+        value: function cmd(name, arg) {
+            var cmd = this.token('cmd');
+            cmd.innerText = "\\" + name + "{" + arg + "}";
+            this.top().appendChild(cmd);
+        }
+    }, {
+        key: "token",
+        value: function token(type, id) {
+            var el = util_1.e('span', {
+                'data-type': type
+            });
+            if (id) el.setAttribute('data-sync', String(id));
+            return el;
+        }
+    }, {
+        key: "newLine",
+        value: function newLine() {
+            var div = util_1.e('div');
+            div.dir = 'auto';
+            div.className = 'line';
+            return div;
+        }
+    }, {
+        key: "hr",
+        value: function hr() {
+            this.clear();
+            var hr = this.token('hr');
+            hr.innerText = '--';
+            this.top().appendChild(hr);
+        }
+    }, {
+        key: "startElement",
+        value: function startElement(type, id) {
+            var el = this.token(type, id);
+            this.dirAuto(type, el);
+            this.push(el);
+            if (type === 'p' || type === 'li') this.push(this.newLine());
+        }
+    }, {
+        key: "endElement",
+        value: function endElement(type) {
+            this.pop();
+            if (type === 'p' || type === 'li') {
+                var p = this.top();
+                p.removeChild(p.lastChild);
+                this.pop();
+            }
+        }
+    }, {
+        key: "startEnv",
+        value: function startEnv(type) {
+            var env = this.token('env');
+            env.innerText = "\\" + type;
+            this.top().appendChild(env);
+        }
+    }, {
+        key: "endEnv",
+        value: function endEnv(type) {
+            var env = this.token('env');
+            env.innerText = "\\" + type;
+            env.className = 'end';
+            this.top().appendChild(env);
+        }
+    }, {
+        key: "esc",
+        value: function esc(val) {
+            this.txt(val);
+        }
+    }, {
+        key: "txt",
+        value: function txt(val) {
+            var txt = this.token('');
+            txt.innerText = val;
+            this.top().appendChild(txt);
+        }
+    }, {
+        key: "eol",
+        value: function eol() {
+            if (this.top().className === 'line') {
+                this.pop();
+                this.push(this.newLine());
+            }
+        }
+    }, {
+        key: "blank",
+        value: function blank() {
+            this.top().appendChild(util_1.e('br'));
+        }
+    }, {
+        key: "a",
+        value: function a(title, href, id) {
+            var a = this.token('a', id);
+            a.innerText = "[" + title + "](" + href + ")";
+            this.top().appendChild(a);
+        }
+    }, {
+        key: "img",
+        value: function img(title, src, id) {
+            var img = this.token('img', id);
+            img.innerText = "![" + title + "](" + src + ")";
+            this.top().appendChild(img);
+        }
+    }, {
+        key: "$",
+        value: function $(tex, id) {
+            var $ = this.token('$', id);
+            $.innerText = tex;
+            this.top().appendChild($);
+        }
+    }, {
+        key: "$$",
+        value: function $$(tex, id) {
+            var $$ = this.token('$$', id);
+            $$.innerHTML = tex;
+            this.top().appendChild($$);
+        }
+    }, {
+        key: "tikz",
+        value: function tikz(val, id) {
+            var tikz = this.token('tikz', id);
+            tikz.innerText = val;
+            this.top().appendChild(tikz);
+        }
+    }]);
+
+    return Syntax;
+}(AbstractRenderer_1.AbstractRenderer);
+
+exports.Syntax = Syntax;
+},{"./AbstractRenderer":18,"./util":12}],14:[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var util_1 = require("./util");
+var firstVisibleKid = function firstVisibleKid(el) {
+    var scrollTop = el.scrollTop;
+    var kids = el.querySelectorAll('[data-sync]');
+    for (var i = 0; i < kids.length; i++) {
+        var e = kids.item(i);
+        if (e.offsetTop > scrollTop) return e;
+    }
+    return kids.item(kids.length - 1);
+};
+var lastVisibleKid = function lastVisibleKid(el) {
+    var scrollTop = el.scrollTop + el.clientHeight;
+    var kids = el.querySelectorAll('[data-sync]');
+    for (var i = 0; i < kids.length; i++) {
+        var e = kids.item(i);
+        if (e.offsetTop + e.scrollHeight > scrollTop) return kids.item(i - 1);
+    }
+    return kids.item(kids.length - 1);
+};
+var highlight = function highlight() {
+    for (var _len = arguments.length, elms = Array(_len), _key = 0; _key < _len; _key++) {
+        elms[_key] = arguments[_key];
+    }
+
+    elms.forEach(function (e) {
+        return e.className = 'highlight';
+    });
+    setTimeout(function () {
+        elms.forEach(function (e) {
+            return e.className = '';
+        });
+    }, 2000);
+};
+function sync(e1, e2) {
+    var e1ScrollTop = e1.scrollTop;
+    var e2ScrollTop = e2.scrollTop;
+    var e1OnScroll = util_1.debounce(function () {
+        var down = e1ScrollTop < e1.scrollTop;
+        e1ScrollTop = e1.scrollTop;
+        e2.removeEventListener('scroll', e2OnScroll);
+        var kid = down ? lastVisibleKid(e1) : firstVisibleKid(e1);
+        var brother = e2.querySelector("[data-sync=\"" + kid.getAttribute('data-sync') + "\"]");
+        if (brother !== null) {
+            highlight(kid, brother);
+            brother.scrollIntoView({
+                block: down ? 'end' : 'start',
+                inline: 'nearest',
+                behavior: 'smooth'
+            });
+        }
+    }, 300);
+    var e2OnScroll = util_1.debounce(function () {
+        var down = e2ScrollTop < e2.scrollTop;
+        e2ScrollTop = e2.scrollTop;
+        e1.removeEventListener('scroll', e1OnScroll);
+        var kid = down ? lastVisibleKid(e2) : firstVisibleKid(e2);
+        var brother = e1.querySelector("[data-sync=\"" + kid.getAttribute('data-sync') + "\"]");
+        if (brother !== null) {
+            highlight(kid, brother);
+            brother.scrollIntoView({
+                block: down ? 'end' : 'start',
+                inline: 'nearest',
+                behavior: 'smooth'
+            });
+        }
+    }, 300);
+    e1.addEventListener('scroll', util_1.debounce(function () {
+        e1.addEventListener('scroll', e1OnScroll);
+    }, 300));
+    e2.addEventListener('scroll', util_1.debounce(function () {
+        e2.addEventListener('scroll', e2OnScroll);
+    }, 300));
+    e1.addEventListener('scroll', e1OnScroll);
+    e2.addEventListener('scroll', e2OnScroll);
+}
+exports.sync = sync;
+},{"./util":12}],15:[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.welcome = encodeURIComponent("\n\n# $\\TeX$.ninja\n\n## Text\n\n- plain\n- *bold*\n- /italic/\n- _underline_\n\n## math\n\nInline $a \\leq b$ or block:\n\n$$\n\\int \\frac{1}{x}\\;dx = \\ln|x| + C\n$$\n\n## Images\n\n\\center\n![](https://goo.gl/22sw2D)\n\n\\begin{tikzpicture}\n\n\\foreach[count=\\i] \\s in {60,120,...,360}{\n  \\node[draw, circle](\\i) at (\\s:3) {$\\i$};\n}\n\\foreach \\i in {1,...,6}{\n  \\foreach \\j in {1,...,6}{\n    \\draw (\\i) to[bend right] (\\j);\n  }\n}\n\n\\end{tikzpicture}\n\\center\n\n\n--\n\n\\center\n[TeX.ninja](https://tex.ninja) - write $\\LaTeX$ like a Ninja.\n\\center\n\n\n");
+},{}],9:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var texdown_1 = require("texdown");
 var Html_1 = require("../Html");
+var Syntax_1 = require("../Syntax");
+var sync_1 = require("../sync");
 var util_1 = require("../util");
+var welcome_1 = require("../welcome");
 document.addEventListener('DOMContentLoaded', function () {
-    var content = document.getElementById('content');
+    var get = function get(id) {
+        return document.getElementById(id);
+    };
+    var input = get('input');
+    var editor = get('editor');
+    var output = get('output');
     var html = new Html_1.Html();
-    texdown_1.texDown(util_1.readHash() + '\n', html);
-    content.appendChild(html.root);
+    var syntax = new Syntax_1.Syntax();
+    var update = function update() {
+        syntax.reset();
+        html.reset();
+        var tex = util_1.readHash() + '\n';
+        texdown_1.texDown(tex, html, syntax);
+        requestAnimationFrame(function () {
+            window.parent.postMessage(tex, '*');
+            editor.innerHTML = '';
+            editor.appendChild(syntax.root);
+            output.innerHTML = '';
+            output.appendChild(html.root);
+            input.style.height = editor.scrollHeight + 40 + 'px';
+        });
+    };
+    input.addEventListener('keydown', function (e) {
+        if (e.keyCode !== 9) return;
+        var start = input.selectionStart;
+        var end = input.selectionEnd;
+        var value = input.value;
+        var space = '  ';
+        input.value = value.substring(0, start) + space + value.substring(end);
+        input.selectionStart = input.selectionEnd = start + space.length;
+        e.preventDefault();
+        window.location.hash = encodeURIComponent(input.value);
+    });
+    input.addEventListener('input', function () {
+        window.location.hash = encodeURIComponent(input.value);
+    });
+    if (window.location.hash.length <= 1) window.location.hash = welcome_1.welcome;
+    sync_1.sync(get('lcol'), get('rcol'));
+    input.value = util_1.readHash();
+    editor.focus();
+    window.onhashchange = update;
+    update();
 });
-},{"texdown":30,"../Html":25,"../util":26}]},{},[21], null)
-//# sourceMappingURL=/view.d8929952.map
+},{"texdown":17,"../Html":11,"../Syntax":13,"../sync":14,"../util":12,"../welcome":15}]},{},[9], null)
+//# sourceMappingURL=/edit.4d8a7402.map

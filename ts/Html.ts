@@ -94,8 +94,10 @@ export class Html extends AbstractRenderer {
         this.top().appendChild(span)
     }
 
-    private tikzImg = debounce((tikz: string, img: HTMLImageElement) => {
-        img.src = `https://tikz.men/${encodeURIComponent(tikz)}`
+    tikzCache = new Set()
+    private tikzImg = debounce((src: string, img: HTMLImageElement) => {
+        img.src = src
+        this.tikzCache.add(src)
     }, 2000)
 
     tikz(tikz: string, id: number) {
@@ -103,6 +105,8 @@ export class Html extends AbstractRenderer {
         img.alt = 'Generating tikz...'
         this.top().appendChild(img)
         this.sync(img, id)
-        this.tikzImg(tikz, img)
+        const src = `https://tikz.men/${encodeURIComponent(tikz)}`
+        if (this.tikzCache.has(src)) img.src = src
+        else this.tikzImg(src, img)
     }
 }
