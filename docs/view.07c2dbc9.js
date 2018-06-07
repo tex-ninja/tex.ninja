@@ -98,7 +98,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   // Override the current require with this new one
   return newRequire;
-})({86:[function(require,module,exports) {
+})({220:[function(require,module,exports) {
 var define;
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -563,7 +563,7 @@ var define;
 
 }))
 
-},{}],85:[function(require,module,exports) {
+},{}],217:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const moo = require("moo");
@@ -748,7 +748,7 @@ function texDown(markDown, ...renderers) {
 }
 exports.texDown = texDown;
 
-},{"moo":86}],87:[function(require,module,exports) {
+},{"moo":220}],218:[function(require,module,exports) {
 var define;
 var global = arguments[3];
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -18266,7 +18266,7 @@ module.exports = {"name":"katex","version":"0.10.0-alpha","description":"Fast ma
 /***/ })
 /******/ ])["default"];
 });
-},{}],78:[function(require,module,exports) {
+},{}],213:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -18295,7 +18295,7 @@ function debounce(f, timeout) {
     };
 }
 exports.debounce = debounce;
-},{}],88:[function(require,module,exports) {
+},{}],219:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18358,7 +18358,7 @@ var AbstractRenderer = function () {
 }();
 
 exports.AbstractRenderer = AbstractRenderer;
-},{"./util":78}],75:[function(require,module,exports) {
+},{"./util":213}],212:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18509,7 +18509,7 @@ var Html = function (_AbstractRenderer_1$A) {
 }(AbstractRenderer_1.AbstractRenderer);
 
 exports.Html = Html;
-},{"katex":87,"./AbstractRenderer":88,"./util":78}],10:[function(require,module,exports) {
+},{"katex":218,"./AbstractRenderer":219,"./util":213}],24:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -18522,5 +18522,5 @@ document.addEventListener('DOMContentLoaded', function () {
     texdown_1.texDown(util_1.readHash() + '\n', html);
     content.appendChild(html.root);
 });
-},{"texdown":85,"../Html":75,"../util":78}]},{},[10], null)
+},{"texdown":217,"../Html":212,"../util":213}]},{},[24], null)
 //# sourceMappingURL=/view.07c2dbc9.map

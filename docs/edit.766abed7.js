@@ -98,7 +98,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   // Override the current require with this new one
   return newRequire;
-})({86:[function(require,module,exports) {
+})({220:[function(require,module,exports) {
 var define;
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -563,7 +563,7 @@ var define;
 
 }))
 
-},{}],85:[function(require,module,exports) {
+},{}],217:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const moo = require("moo");
@@ -748,7 +748,7 @@ function texDown(markDown, ...renderers) {
 }
 exports.texDown = texDown;
 
-},{"moo":86}],87:[function(require,module,exports) {
+},{"moo":220}],218:[function(require,module,exports) {
 var define;
 var global = arguments[3];
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -18266,7 +18266,7 @@ module.exports = {"name":"katex","version":"0.10.0-alpha","description":"Fast ma
 /***/ })
 /******/ ])["default"];
 });
-},{}],78:[function(require,module,exports) {
+},{}],213:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -18295,7 +18295,7 @@ function debounce(f, timeout) {
     };
 }
 exports.debounce = debounce;
-},{}],88:[function(require,module,exports) {
+},{}],219:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18358,7 +18358,7 @@ var AbstractRenderer = function () {
 }();
 
 exports.AbstractRenderer = AbstractRenderer;
-},{"./util":78}],75:[function(require,module,exports) {
+},{"./util":213}],212:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18509,7 +18509,7 @@ var Html = function (_AbstractRenderer_1$A) {
 }(AbstractRenderer_1.AbstractRenderer);
 
 exports.Html = Html;
-},{"katex":87,"./AbstractRenderer":88,"./util":78}],76:[function(require,module,exports) {
+},{"katex":218,"./AbstractRenderer":219,"./util":213}],214:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18664,7 +18664,7 @@ var Syntax = function (_AbstractRenderer_1$A) {
 }(AbstractRenderer_1.AbstractRenderer);
 
 exports.Syntax = Syntax;
-},{"./AbstractRenderer":88,"./util":78}],77:[function(require,module,exports) {
+},{"./AbstractRenderer":219,"./util":213}],215:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -18740,16 +18740,22 @@ function sync(e1, e2) {
     e2.addEventListener('scroll', util_1.debounce(function () {
         e2.addEventListener('scroll', e2OnScroll);
     }, 300));
+    e1.addEventListener('keydown', util_1.debounce(function () {
+        e2.removeEventListener('scroll', e2OnScroll);
+    }, 300));
+    e1.addEventListener('keyup', util_1.debounce(function () {
+        e2.addEventListener('scroll', e2OnScroll);
+    }, 300));
     e1.addEventListener('scroll', e1OnScroll);
     e2.addEventListener('scroll', e2OnScroll);
 }
 exports.sync = sync;
-},{"./util":78}],79:[function(require,module,exports) {
+},{"./util":213}],216:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.welcome = encodeURIComponent("\n\n# $\\TeX$.ninja\n\n## Text\n\n- plain\n- *bold*\n- /italic/\n- _underline_\n\n## math\n\nInline $a \\leq b$ or block:\n\n$$\n\\int \\frac{1}{x}\\;dx = \\ln|x| + C\n$$\n\n## Images\n\n\\center\n![](https://goo.gl/22sw2D)\n\n\\begin{tikzpicture}\n\n\\foreach[count=\\i] \\s in {60,120,...,360}{\n  \\node[draw, circle](\\i) at (\\s:3) {$\\i$};\n}\n\\foreach \\i in {1,...,6}{\n  \\foreach \\j in {1,...,6}{\n    \\draw (\\i) to[bend right] (\\j);\n  }\n}\n\n\\end{tikzpicture}\n\\center\n\n\n--\n\n\\center\n[TeX.ninja](https://tex.ninja) - write $\\LaTeX$ like a Ninja.\n\\center\n\n\n");
-},{}],9:[function(require,module,exports) {
+},{}],26:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -18803,5 +18809,5 @@ document.addEventListener('DOMContentLoaded', function () {
     window.onhashchange = update;
     update();
 });
-},{"texdown":85,"../Html":75,"../Syntax":76,"../sync":77,"../util":78,"../welcome":79}]},{},[9], null)
-//# sourceMappingURL=/edit.e19af42f.map
+},{"texdown":217,"../Html":212,"../Syntax":214,"../sync":215,"../util":213,"../welcome":216}]},{},[26], null)
+//# sourceMappingURL=/edit.766abed7.map
