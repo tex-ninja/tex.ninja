@@ -85,6 +85,14 @@ export function sync(e1: HTMLElement, e2: HTMLElement) {
         e2.addEventListener('scroll', e2OnScroll)
     }, 300))
 
+    e1.addEventListener('keydown', debounce(() => {
+        e2.removeEventListener('scroll', e2OnScroll)
+    }, 300))
+
+    e1.addEventListener('keyup', debounce(() => {
+        e2.addEventListener('scroll', e2OnScroll)
+    }, 300))
+
     e1.addEventListener('scroll', e1OnScroll)
     e2.addEventListener('scroll', e2OnScroll)
 }
