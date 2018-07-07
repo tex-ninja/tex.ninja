@@ -22,6 +22,7 @@ a {
     text-decoration: none;
 }
 
-.highlight {
+.highlight,
+.highlight>.katex-display {
     background-color: gold;
 }

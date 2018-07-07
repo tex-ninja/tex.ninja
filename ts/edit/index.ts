@@ -1,19 +1,32 @@
 import { texDown } from 'texdown';
 import { Html } from '../Html';
 import { Syntax } from '../Syntax';
-import { sync } from '../sync';
-import { readHash } from '../util';
+import { readHash, debounce } from '../util';
 import { welcome } from '../welcome';
+import { SyncCol } from '../SyncCol';
 
 document.addEventListener('DOMContentLoaded', () => {
-    const get = (id: string) => document.getElementById(id)
+    const get = (id: string) => document.getElementById(id) as HTMLElement
     const input = get('input') as HTMLTextAreaElement
     const editor = get('editor') as HTMLDivElement
     const output = get('output') as HTMLDivElement
 
+    const editorCol = new SyncCol(
+        get('lcol'), (dataSync, down) => {
+            viewCol.scrollTo(dataSync, down)
+            console.log(dataSync, down)
+        })
+
+    const viewCol = new SyncCol(
+        get('rcol'), (dataSync, down) => {
+            editorCol.scrollTo(dataSync, down)
+            console.log(dataSync, down)
+        })
+
     const html = new Html()
     const syntax = new Syntax()
     const update = () => {
+        viewCol.pause()
         syntax.reset()
         html.reset()
         const tex = readHash() + '\n'
@@ -52,11 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.location.hash.length <= 1)
         window.location.hash = welcome
 
-
-    sync(
-        get('lcol') as HTMLElement
-        , get('rcol') as HTMLElement
-    )
 
     input.value = readHash()
     editor.focus()

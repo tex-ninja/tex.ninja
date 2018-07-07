@@ -14,7 +14,7 @@
         "@types/moo": "^0.4.0"
     },
     "dependencies": {
-        "katex": "^0.10.0-alpha",
+        "katex": "^0.10.0-beta",
         "texdown": "^1.1.4"
     },
     "scripts": {}
