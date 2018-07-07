@@ -18,7 +18,8 @@ a {
   color: #690;
   text-decoration: none; }
 
-.highlight {
+.highlight,
+.highlight > .katex-display {
   background-color: gold; }
 
 /*# sourceMappingURL=main.css.map */
