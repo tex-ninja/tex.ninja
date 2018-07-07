@@ -28,7 +28,6 @@ export class SyncCol {
         }, 300)
 
         e.addEventListener('scroll', debounce(() => {
-            console.log('adding....', this.e.id)
             e.addEventListener('scroll', this.onScroll)
         }, 300))
     }
@@ -55,7 +54,6 @@ export class SyncCol {
     }
 
     public pause() {
-        console.log('pause', this.e.id)
         this.e.removeEventListener('scroll', this.onScroll)
     }
 
@@ -64,7 +62,6 @@ export class SyncCol {
             `[data-sync="${dataSync}"]`
         ) as HTMLElement | null
 
-        console.log('scrollTo', dataSync, e)
         if (e === null) return
 
         highlight(e)

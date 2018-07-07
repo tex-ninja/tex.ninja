@@ -14,13 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const editorCol = new SyncCol(
         get('lcol'), (dataSync, down) => {
             viewCol.scrollTo(dataSync, down)
-            console.log(dataSync, down)
         })
 
     const viewCol = new SyncCol(
         get('rcol'), (dataSync, down) => {
             editorCol.scrollTo(dataSync, down)
-            console.log(dataSync, down)
         })
 
     const html = new Html()
