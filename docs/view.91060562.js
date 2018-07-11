@@ -98,7 +98,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   // Override the current require with this new one
   return newRequire;
-})({91:[function(require,module,exports) {
+})({98:[function(require,module,exports) {
 var define;
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -563,7 +563,7 @@ var define;
 
 }))
 
-},{}],85:[function(require,module,exports) {
+},{}],86:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const moo = require("moo");
@@ -578,8 +578,8 @@ const tokens = {
     b: '*',
     i: '/',
     u: '_',
-    uli: /^\- /,
-    oli: /^\d+\. /,
+    uli: /^[ ]*\- /,
+    oli: /^[ ]*\d+\. /,
     a: /\[[^\]\n]*\]\([^)\n]*\)/,
     img: /!\[[^\]\n]*\]\([^)\n]*\)/,
     $$: /^\$\$$(?:\\\$|[^$])+^\$\$$/,
@@ -593,6 +593,7 @@ const tokens = {
     eol: { match: /\n/, lineBreaks: true }
 };
 function texDown(markDown, ...renderers) {
+    let currentToken;
     const lexer = moo.compile(tokens);
     lexer.reset(markDown);
     const elements = [];
@@ -619,9 +620,10 @@ function texDown(markDown, ...renderers) {
                 r.endEnv('center');
         });
     };
-    const pushElement = (type) => {
-        elements.push(type);
-        renderers.forEach(r => r.startElement(type, id));
+    const pushElement = (el) => {
+        elements.push(el);
+        renderers.forEach(r => r.startElement(el, id));
+        return el;
     };
     const startEnv = (env) => {
         envs[env] = true;
@@ -629,23 +631,49 @@ function texDown(markDown, ...renderers) {
     };
     const h = (type) => {
         clearElements();
-        pushElement(type);
+        pushElement({
+            type: type,
+            token: currentToken.text
+        });
     };
     const format = (type) => {
-        if (topElement() === type) {
+        if (elements.length && topElement().type === type) {
             popElement();
             return;
         }
         if (!elements.length)
-            pushElement('p');
-        pushElement(type);
+            pushElement({
+                type: 'p',
+                token: ''
+            });
+        pushElement({
+            type: type,
+            token: currentToken.text
+        });
     };
-    const list = (type) => {
-        while (elements.length && topElement() !== type)
+    const li = (type) => {
+        const nestLevel = currentToken.text.replace(/\d+/, '').length;
+        const matchingList = () => {
+            const te = topElement();
+            return te
+                && ['ul', 'ol'].includes(te.type)
+                && te.data <= nestLevel;
+        };
+        while (elements.length && !matchingList()) {
             popElement();
-        if (topElement() !== type)
-            pushElement(type);
-        pushElement('li');
+        }
+        const te = topElement();
+        if (!te || te.type !== type || te.data < nestLevel) {
+            pushElement({
+                type: type,
+                token: '',
+                data: nestLevel
+            });
+        }
+        pushElement({
+            type: 'li',
+            token: currentToken.text
+        });
     };
     const reLink = /!?\[([^\]]*)\]\(([^)]*)\)/;
     const extractLink = (link) => {
@@ -667,61 +695,73 @@ function texDown(markDown, ...renderers) {
         b: () => format('b'),
         i: () => format('i'),
         u: () => format('u'),
-        uli: () => list('ul'),
-        oli: () => list('ol'),
-        a: (token) => {
+        uli: () => li('ul'),
+        oli: () => li('ol'),
+        a: () => {
             if (!elements.length)
-                pushElement('p');
-            const [title, href] = extractLink(token.text);
+                pushElement({
+                    type: 'p',
+                    token: ''
+                });
+            const [title, href] = extractLink(currentToken.text);
             renderers.forEach(r => r.a(title, href, id));
         },
-        img: (token) => {
+        img: () => {
             if (!elements.length)
-                pushElement('p');
-            const [title, href] = extractLink(token.text);
+                pushElement({
+                    type: 'p',
+                    token: ''
+                });
+            const [title, href] = extractLink(currentToken.text);
             renderers.forEach(r => r.img(title, href, id));
         },
-        $$: (token) => {
+        $$: () => {
             clearElements();
-            const txt = token.text;
+            const txt = currentToken.text;
             const tex = txt.substring(2, txt.length - 2);
             renderers.forEach(r => r.$$(tex, id));
         },
-        $: (token) => {
+        $: () => {
             if (!elements.length)
-                pushElement('p');
-            const txt = token.text;
+                pushElement({
+                    type: 'p',
+                    token: ''
+                });
+            const txt = currentToken.text;
             const tex = txt.substring(1, txt.length - 1);
             renderers.forEach(r => r.$(tex, id));
         },
-        env: (token) => {
-            const env = token.text.substr(1);
+        env: () => {
+            const env = currentToken.text.substr(1);
             clearElements();
             if (envs[env])
                 endEnv(env);
             else
                 startEnv(env);
         },
-        cmd: (token) => {
-            const [name, arg] = extractCmd(token.text);
+        cmd: () => {
+            const [name, arg] = extractCmd(currentToken.text);
             renderers.forEach(r => {
                 r.cmd(name, arg);
             });
         },
-        tikz: (token) => {
-            renderers.forEach(r => r.tikz(token.text, id));
+        tikz: () => {
+            renderers.forEach(r => r.tikz(currentToken.text, id));
         },
         hr: () => {
             clearElements();
             renderers.forEach(r => r.hr());
         },
-        esc: (token) => {
-            renderers.forEach(r => r.esc(token.text));
+        esc: () => {
+            renderers.forEach(r => r.esc(currentToken.text));
         },
-        txt: (token) => {
+        txt: () => {
             if (!elements.length)
-                pushElement('p');
-            renderers.forEach(r => r.txt(token.text));
+                pushElement({
+                    type: 'p',
+                    token: ''
+                });
+            renderers.forEach(r => r.txt(currentToken.text));
         },
         blank: () => {
             clearElements();
@@ -729,18 +769,18 @@ function texDown(markDown, ...renderers) {
         },
         eol: () => {
             while (elements.length
-                && topElement() !== 'p'
-                && topElement() !== 'li')
+                && topElement().type !== 'p'
+                && topElement().type !== 'li')
                 popElement();
             renderers.forEach(r => r.eol());
         }
     };
     while (true) {
         id++;
-        const token = lexer.next();
-        if (token === undefined)
+        currentToken = lexer.next();
+        if (currentToken === undefined)
             break;
-        actions[token.type](token);
+        actions[currentToken.type]();
     }
     clearElements();
     clearEnvs();
@@ -748,7 +788,7 @@ function texDown(markDown, ...renderers) {
 }
 exports.texDown = texDown;
 
-},{"moo":91}],87:[function(require,module,exports) {
+},{"moo":98}],96:[function(require,module,exports) {
 var define;
 var global = arguments[3];
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -18585,20 +18625,24 @@ module.exports = { "default": __webpack_require__(119), __esModule: true };
 /***/ })
 /******/ ])["default"];
 });
-},{}],77:[function(require,module,exports) {
+},{}],83:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.readHash = function () {
     return decodeURIComponent(window.location.hash.substr(1));
 };
+var excludeDirAuto = ['b', 'u', 'i', 'li'];
 exports.e = function (name) {
     var atts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
     var e = document.createElement(name);
     for (var k in atts) {
         e.setAttribute(k, atts[k]);
-    }return e;
+    }if (!excludeDirAuto.includes(name)) {
+        e.dir = 'auto';
+    }
+    return e;
 };
 function debounce(f, timeout) {
     var to = void 0;
@@ -18614,7 +18658,7 @@ function debounce(f, timeout) {
     };
 }
 exports.debounce = debounce;
-},{}],88:[function(require,module,exports) {
+},{}],94:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18630,18 +18674,11 @@ var AbstractRenderer = function () {
 
         this.root = util_1.e('div');
         this.stack = [this.root];
-        this.excludeDirAuto = ['b', 'u', 'i', 'li'];
     }
 
     _createClass(AbstractRenderer, [{
         key: "done",
         value: function done() {}
-    }, {
-        key: "dirAuto",
-        value: function dirAuto(type, el) {
-            if (this.excludeDirAuto.includes(type)) return;
-            el.dir = 'auto';
-        }
     }, {
         key: "reset",
         value: function reset() {
@@ -18677,7 +18714,7 @@ var AbstractRenderer = function () {
 }();
 
 exports.AbstractRenderer = AbstractRenderer;
-},{"./util":77}],75:[function(require,module,exports) {
+},{"./util":83}],82:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18742,9 +18779,9 @@ var Html = function (_AbstractRenderer_1$A) {
         }
     }, {
         key: "startElement",
-        value: function startElement(type, id) {
+        value: function startElement(elm, id) {
+            var type = elm.type;
             var el = util_1.e(type);
-            this.dirAuto(type, el);
             this.sync(el, id);
             this.push(el);
         }
@@ -18828,7 +18865,7 @@ var Html = function (_AbstractRenderer_1$A) {
 }(AbstractRenderer_1.AbstractRenderer);
 
 exports.Html = Html;
-},{"katex":87,"./AbstractRenderer":88,"./util":77}],10:[function(require,module,exports) {
+},{"katex":96,"./AbstractRenderer":94,"./util":83}],9:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -18841,5 +18878,5 @@ document.addEventListener('DOMContentLoaded', function () {
     texdown_1.texDown(util_1.readHash() + '\n', html);
     content.appendChild(html.root);
 });
-},{"texdown":85,"../Html":75,"../util":77}]},{},[10], null)
-//# sourceMappingURL=/view.69e7164e.map
+},{"texdown":86,"../Html":82,"../util":83}]},{},[9], null)
+//# sourceMappingURL=/view.91060562.map

@@ -98,7 +98,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   // Override the current require with this new one
   return newRequire;
-})({91:[function(require,module,exports) {
+})({98:[function(require,module,exports) {
 var define;
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -563,7 +563,7 @@ var define;
 
 }))
 
-},{}],85:[function(require,module,exports) {
+},{}],86:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const moo = require("moo");
@@ -578,8 +578,8 @@ const tokens = {
     b: '*',
     i: '/',
     u: '_',
-    uli: /^\- /,
-    oli: /^\d+\. /,
+    uli: /^[ ]*\- /,
+    oli: /^[ ]*\d+\. /,
     a: /\[[^\]\n]*\]\([^)\n]*\)/,
     img: /!\[[^\]\n]*\]\([^)\n]*\)/,
     $$: /^\$\$$(?:\\\$|[^$])+^\$\$$/,
@@ -593,6 +593,7 @@ const tokens = {
     eol: { match: /\n/, lineBreaks: true }
 };
 function texDown(markDown, ...renderers) {
+    let currentToken;
     const lexer = moo.compile(tokens);
     lexer.reset(markDown);
     const elements = [];
@@ -619,9 +620,10 @@ function texDown(markDown, ...renderers) {
                 r.endEnv('center');
         });
     };
-    const pushElement = (type) => {
-        elements.push(type);
-        renderers.forEach(r => r.startElement(type, id));
+    const pushElement = (el) => {
+        elements.push(el);
+        renderers.forEach(r => r.startElement(el, id));
+        return el;
     };
     const startEnv = (env) => {
         envs[env] = true;
@@ -629,23 +631,49 @@ function texDown(markDown, ...renderers) {
     };
     const h = (type) => {
         clearElements();
-        pushElement(type);
+        pushElement({
+            type: type,
+            token: currentToken.text
+        });
     };
     const format = (type) => {
-        if (topElement() === type) {
+        if (elements.length && topElement().type === type) {
             popElement();
             return;
         }
         if (!elements.length)
-            pushElement('p');
-        pushElement(type);
+            pushElement({
+                type: 'p',
+                token: ''
+            });
+        pushElement({
+            type: type,
+            token: currentToken.text
+        });
     };
-    const list = (type) => {
-        while (elements.length && topElement() !== type)
+    const li = (type) => {
+        const nestLevel = currentToken.text.replace(/\d+/, '').length;
+        const matchingList = () => {
+            const te = topElement();
+            return te
+                && ['ul', 'ol'].includes(te.type)
+                && te.data <= nestLevel;
+        };
+        while (elements.length && !matchingList()) {
             popElement();
-        if (topElement() !== type)
-            pushElement(type);
-        pushElement('li');
+        }
+        const te = topElement();
+        if (!te || te.type !== type || te.data < nestLevel) {
+            pushElement({
+                type: type,
+                token: '',
+                data: nestLevel
+            });
+        }
+        pushElement({
+            type: 'li',
+            token: currentToken.text
+        });
     };
     const reLink = /!?\[([^\]]*)\]\(([^)]*)\)/;
     const extractLink = (link) => {
@@ -667,61 +695,73 @@ function texDown(markDown, ...renderers) {
         b: () => format('b'),
         i: () => format('i'),
         u: () => format('u'),
-        uli: () => list('ul'),
-        oli: () => list('ol'),
-        a: (token) => {
+        uli: () => li('ul'),
+        oli: () => li('ol'),
+        a: () => {
             if (!elements.length)
-                pushElement('p');
-            const [title, href] = extractLink(token.text);
+                pushElement({
+                    type: 'p',
+                    token: ''
+                });
+            const [title, href] = extractLink(currentToken.text);
             renderers.forEach(r => r.a(title, href, id));
         },
-        img: (token) => {
+        img: () => {
             if (!elements.length)
-                pushElement('p');
-            const [title, href] = extractLink(token.text);
+                pushElement({
+                    type: 'p',
+                    token: ''
+                });
+            const [title, href] = extractLink(currentToken.text);
             renderers.forEach(r => r.img(title, href, id));
         },
-        $$: (token) => {
+        $$: () => {
             clearElements();
-            const txt = token.text;
+            const txt = currentToken.text;
             const tex = txt.substring(2, txt.length - 2);
             renderers.forEach(r => r.$$(tex, id));
         },
-        $: (token) => {
+        $: () => {
             if (!elements.length)
-                pushElement('p');
-            const txt = token.text;
+                pushElement({
+                    type: 'p',
+                    token: ''
+                });
+            const txt = currentToken.text;
             const tex = txt.substring(1, txt.length - 1);
             renderers.forEach(r => r.$(tex, id));
         },
-        env: (token) => {
-            const env = token.text.substr(1);
+        env: () => {
+            const env = currentToken.text.substr(1);
             clearElements();
             if (envs[env])
                 endEnv(env);
             else
                 startEnv(env);
         },
-        cmd: (token) => {
-            const [name, arg] = extractCmd(token.text);
+        cmd: () => {
+            const [name, arg] = extractCmd(currentToken.text);
             renderers.forEach(r => {
                 r.cmd(name, arg);
             });
         },
-        tikz: (token) => {
-            renderers.forEach(r => r.tikz(token.text, id));
+        tikz: () => {
+            renderers.forEach(r => r.tikz(currentToken.text, id));
         },
         hr: () => {
             clearElements();
             renderers.forEach(r => r.hr());
         },
-        esc: (token) => {
-            renderers.forEach(r => r.esc(token.text));
+        esc: () => {
+            renderers.forEach(r => r.esc(currentToken.text));
         },
-        txt: (token) => {
+        txt: () => {
             if (!elements.length)
-                pushElement('p');
-            renderers.forEach(r => r.txt(token.text));
+                pushElement({
+                    type: 'p',
+                    token: ''
+                });
+            renderers.forEach(r => r.txt(currentToken.text));
         },
         blank: () => {
             clearElements();
@@ -729,18 +769,18 @@ function texDown(markDown, ...renderers) {
         },
         eol: () => {
             while (elements.length
-                && topElement() !== 'p'
-                && topElement() !== 'li')
+                && topElement().type !== 'p'
+                && topElement().type !== 'li')
                 popElement();
             renderers.forEach(r => r.eol());
         }
     };
     while (true) {
         id++;
-        const token = lexer.next();
-        if (token === undefined)
+        currentToken = lexer.next();
+        if (currentToken === undefined)
             break;
-        actions[token.type](token);
+        actions[currentToken.type]();
     }
     clearElements();
     clearEnvs();
@@ -748,7 +788,7 @@ function texDown(markDown, ...renderers) {
 }
 exports.texDown = texDown;
 
-},{"moo":91}],87:[function(require,module,exports) {
+},{"moo":98}],96:[function(require,module,exports) {
 var define;
 var global = arguments[3];
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -18585,20 +18625,24 @@ module.exports = { "default": __webpack_require__(119), __esModule: true };
 /***/ })
 /******/ ])["default"];
 });
-},{}],77:[function(require,module,exports) {
+},{}],83:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.readHash = function () {
     return decodeURIComponent(window.location.hash.substr(1));
 };
+var excludeDirAuto = ['b', 'u', 'i', 'li'];
 exports.e = function (name) {
     var atts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
     var e = document.createElement(name);
     for (var k in atts) {
         e.setAttribute(k, atts[k]);
-    }return e;
+    }if (!excludeDirAuto.includes(name)) {
+        e.dir = 'auto';
+    }
+    return e;
 };
 function debounce(f, timeout) {
     var to = void 0;
@@ -18614,7 +18658,7 @@ function debounce(f, timeout) {
     };
 }
 exports.debounce = debounce;
-},{}],88:[function(require,module,exports) {
+},{}],94:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18630,18 +18674,11 @@ var AbstractRenderer = function () {
 
         this.root = util_1.e('div');
         this.stack = [this.root];
-        this.excludeDirAuto = ['b', 'u', 'i', 'li'];
     }
 
     _createClass(AbstractRenderer, [{
         key: "done",
         value: function done() {}
-    }, {
-        key: "dirAuto",
-        value: function dirAuto(type, el) {
-            if (this.excludeDirAuto.includes(type)) return;
-            el.dir = 'auto';
-        }
     }, {
         key: "reset",
         value: function reset() {
@@ -18677,7 +18714,7 @@ var AbstractRenderer = function () {
 }();
 
 exports.AbstractRenderer = AbstractRenderer;
-},{"./util":77}],75:[function(require,module,exports) {
+},{"./util":83}],82:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18742,9 +18779,9 @@ var Html = function (_AbstractRenderer_1$A) {
         }
     }, {
         key: "startElement",
-        value: function startElement(type, id) {
+        value: function startElement(elm, id) {
+            var type = elm.type;
             var el = util_1.e(type);
-            this.dirAuto(type, el);
             this.sync(el, id);
             this.push(el);
         }
@@ -18828,7 +18865,7 @@ var Html = function (_AbstractRenderer_1$A) {
 }(AbstractRenderer_1.AbstractRenderer);
 
 exports.Html = Html;
-},{"katex":87,"./AbstractRenderer":88,"./util":77}],76:[function(require,module,exports) {
+},{"katex":96,"./AbstractRenderer":94,"./util":83}],87:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18855,18 +18892,26 @@ var Syntax = function (_AbstractRenderer_1$A) {
     _createClass(Syntax, [{
         key: "cmd",
         value: function cmd(name, arg) {
-            var cmd = this.token('cmd');
-            cmd.innerText = "\\" + name + "{" + arg + "}";
+            var cmd = this.dataType('cmd', "\\" + name + "{" + arg + "}");
             this.top().appendChild(cmd);
         }
     }, {
         key: "token",
-        value: function token(type, id) {
-            var el = util_1.e('span', {
+        value: function token(val) {
+            var tok = util_1.e('span');
+            tok.className = 'token';
+            tok.innerHTML = val;
+            return tok;
+        }
+    }, {
+        key: "dataType",
+        value: function dataType(type, val, id) {
+            var dt = util_1.e('span', {
                 'data-type': type
             });
-            if (id) el.setAttribute('data-sync', String(id));
-            return el;
+            dt.appendChild(this.token(val));
+            if (id) dt.setAttribute('data-sync', String(id));
+            return dt;
         }
     }, {
         key: "newLine",
@@ -18880,41 +18925,35 @@ var Syntax = function (_AbstractRenderer_1$A) {
         key: "hr",
         value: function hr() {
             this.clear();
-            var hr = this.token('hr');
-            hr.innerText = '--';
+            var hr = this.dataType('hr', '--');
             this.top().appendChild(hr);
         }
     }, {
         key: "startElement",
-        value: function startElement(type, id) {
-            var el = this.token(type, id);
-            this.dirAuto(type, el);
+        value: function startElement(e, id) {
+            var type = e.type;
+            console.log(e);
+            var el = this.dataType(type, e.token, id);
             this.push(el);
-            if (type === 'p' || type === 'li') this.push(this.newLine());
         }
     }, {
         key: "endElement",
-        value: function endElement(type) {
-            this.pop();
-            if (type === 'p' || type === 'li') {
-                var p = this.top();
-                p.removeChild(p.lastChild);
-                this.pop();
+        value: function endElement(e) {
+            if (!['li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(e.type)) {
+                this.top().appendChild(this.token(e.token));
             }
+            this.pop();
         }
     }, {
         key: "startEnv",
         value: function startEnv(type) {
-            var env = this.token('env');
-            env.innerText = "\\" + type;
+            var env = this.dataType('env-s', "\\" + type);
             this.top().appendChild(env);
         }
     }, {
         key: "endEnv",
         value: function endEnv(type) {
-            var env = this.token('env');
-            env.innerText = "\\" + type;
-            env.className = 'end';
+            var env = this.dataType('env-e', "\\" + type);
             this.top().appendChild(env);
         }
     }, {
@@ -18925,7 +18964,7 @@ var Syntax = function (_AbstractRenderer_1$A) {
     }, {
         key: "txt",
         value: function txt(val) {
-            var txt = this.token('');
+            var txt = this.dataType('', val);
             txt.innerText = val;
             this.top().appendChild(txt);
         }
@@ -18945,36 +18984,31 @@ var Syntax = function (_AbstractRenderer_1$A) {
     }, {
         key: "a",
         value: function a(title, href, id) {
-            var a = this.token('a', id);
-            a.innerText = "[" + title + "](" + href + ")";
+            var a = this.dataType('a', "[" + title + "](" + href + ")", id);
             this.top().appendChild(a);
         }
     }, {
         key: "img",
         value: function img(title, src, id) {
-            var img = this.token('img', id);
-            img.innerText = "![" + title + "](" + src + ")";
+            var img = this.dataType('img', "![" + title + "](" + src + ")", id);
             this.top().appendChild(img);
         }
     }, {
         key: "$",
         value: function $(tex, id) {
-            var $ = this.token('$', id);
-            $.innerText = tex;
+            var $ = this.dataType('$', tex, id);
             this.top().appendChild($);
         }
     }, {
         key: "$$",
         value: function $$(tex, id) {
-            var $$ = this.token('$$', id);
-            $$.innerHTML = tex;
+            var $$ = this.dataType('$$', tex, id);
             this.top().appendChild($$);
         }
     }, {
         key: "tikz",
         value: function tikz(val, id) {
-            var tikz = this.token('tikz', id);
-            tikz.innerText = val;
+            var tikz = this.dataType('tikz', val, id);
             this.top().appendChild(tikz);
         }
     }]);
@@ -18983,12 +19017,12 @@ var Syntax = function (_AbstractRenderer_1$A) {
 }(AbstractRenderer_1.AbstractRenderer);
 
 exports.Syntax = Syntax;
-},{"./AbstractRenderer":88,"./util":77}],78:[function(require,module,exports) {
+},{"./AbstractRenderer":94,"./util":83}],88:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.welcome = encodeURIComponent("\n\n# $\\TeX$.ninja\n\n## Text\n\n- plain\n- *bold*\n- /italic/\n- _underline_\n\n## math\n\nInline $a \\leq b$ or block:\n\n$$\n\\int \\frac{1}{x}\\;dx = \\ln|x| + C\n$$\n\n## Images\n\n\\center\n![](https://goo.gl/22sw2D)\n\n\\begin{tikzpicture}\n\n\\foreach[count=\\i] \\s in {60,120,...,360}{\n  \\node[draw, circle](\\i) at (\\s:3) {$\\i$};\n}\n\\foreach \\i in {1,...,6}{\n  \\foreach \\j in {1,...,6}{\n    \\draw (\\i) to[bend right] (\\j);\n  }\n}\n\n\\end{tikzpicture}\n\\center\n\n\n--\n\n\\center\n[TeX.ninja](https://tex.ninja) - write $\\LaTeX$ like a Ninja.\n\\center\n\n\n");
-},{}],79:[function(require,module,exports) {
+},{}],89:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -19038,7 +19072,6 @@ var SyncCol = function () {
             onScroll(parseInt(kid.getAttribute('data-sync')), down);
         }, 300);
         e.addEventListener('scroll', util_1.debounce(function () {
-            console.log('adding....', _this.e.id);
             e.addEventListener('scroll', _this.onScroll);
         }, 300));
     }
@@ -19046,14 +19079,12 @@ var SyncCol = function () {
     _createClass(SyncCol, [{
         key: "pause",
         value: function pause() {
-            console.log('pause', this.e.id);
             this.e.removeEventListener('scroll', this.onScroll);
         }
     }, {
         key: "scrollTo",
         value: function scrollTo(dataSync, down) {
             var e = this.e.querySelector("[data-sync=\"" + dataSync + "\"]");
-            console.log('scrollTo', dataSync, e);
             if (e === null) return;
             highlight(e);
             this.pause();
@@ -19067,7 +19098,7 @@ var SyncCol = function () {
 }();
 
 exports.SyncCol = SyncCol;
-},{"./util":77}],8:[function(require,module,exports) {
+},{"./util":83}],18:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -19086,11 +19117,9 @@ document.addEventListener('DOMContentLoaded', function () {
     var output = get('output');
     var editorCol = new SyncCol_1.SyncCol(get('lcol'), function (dataSync, down) {
         viewCol.scrollTo(dataSync, down);
-        console.log(dataSync, down);
     });
     var viewCol = new SyncCol_1.SyncCol(get('rcol'), function (dataSync, down) {
         editorCol.scrollTo(dataSync, down);
-        console.log(dataSync, down);
     });
     var html = new Html_1.Html();
     var syntax = new Syntax_1.Syntax();
@@ -19129,5 +19158,5 @@ document.addEventListener('DOMContentLoaded', function () {
     window.onhashchange = update;
     update();
 });
-},{"texdown":85,"../Html":75,"../Syntax":76,"../util":77,"../welcome":78,"../SyncCol":79}]},{},[8], null)
-//# sourceMappingURL=/edit.c71f272e.map
+},{"texdown":86,"../Html":82,"../Syntax":87,"../util":83,"../welcome":88,"../SyncCol":89}]},{},[18], null)
+//# sourceMappingURL=/edit.58cc8788.map
