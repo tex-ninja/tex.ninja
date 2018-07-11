@@ -35,14 +35,6 @@ export class Syntax extends AbstractRenderer {
         return dt
     }
 
-    private newLine() {
-        const div = e('div')
-        div.dir = 'auto'
-        div.className = 'line'
-        return div
-    }
-
-
     hr() {
         this.clear()
         const hr = this.dataType('hr', '--')
@@ -85,9 +77,9 @@ export class Syntax extends AbstractRenderer {
     }
 
     eol() {
-        if (this.top().className === 'line') {
-            this.pop()
-            this.push(this.newLine())
+        if (['li', 'p'].includes(
+            String(this.top().getAttribute('data-type')))) {
+            this.blank()
         }
     }
 
