@@ -98,7 +98,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   // Override the current require with this new one
   return newRequire;
-})({98:[function(require,module,exports) {
+})({91:[function(require,module,exports) {
 var define;
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -563,7 +563,7 @@ var define;
 
 }))
 
-},{}],86:[function(require,module,exports) {
+},{}],84:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const moo = require("moo");
@@ -788,7 +788,7 @@ function texDown(markDown, ...renderers) {
 }
 exports.texDown = texDown;
 
-},{"moo":98}],96:[function(require,module,exports) {
+},{"moo":91}],92:[function(require,module,exports) {
 var define;
 var global = arguments[3];
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -18625,7 +18625,7 @@ module.exports = { "default": __webpack_require__(119), __esModule: true };
 /***/ })
 /******/ ])["default"];
 });
-},{}],83:[function(require,module,exports) {
+},{}],81:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -18658,7 +18658,7 @@ function debounce(f, timeout) {
     };
 }
 exports.debounce = debounce;
-},{}],94:[function(require,module,exports) {
+},{}],93:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18714,7 +18714,7 @@ var AbstractRenderer = function () {
 }();
 
 exports.AbstractRenderer = AbstractRenderer;
-},{"./util":83}],82:[function(require,module,exports) {
+},{"./util":81}],80:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18865,7 +18865,7 @@ var Html = function (_AbstractRenderer_1$A) {
 }(AbstractRenderer_1.AbstractRenderer);
 
 exports.Html = Html;
-},{"katex":96,"./AbstractRenderer":94,"./util":83}],87:[function(require,module,exports) {
+},{"katex":92,"./AbstractRenderer":93,"./util":81}],85:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18912,14 +18912,6 @@ var Syntax = function (_AbstractRenderer_1$A) {
             dt.appendChild(this.token(val));
             if (id) dt.setAttribute('data-sync', String(id));
             return dt;
-        }
-    }, {
-        key: "newLine",
-        value: function newLine() {
-            var div = util_1.e('div');
-            div.dir = 'auto';
-            div.className = 'line';
-            return div;
         }
     }, {
         key: "hr",
@@ -18971,9 +18963,8 @@ var Syntax = function (_AbstractRenderer_1$A) {
     }, {
         key: "eol",
         value: function eol() {
-            if (this.top().className === 'line') {
-                this.pop();
-                this.push(this.newLine());
+            if (['li', 'p'].includes(String(this.top().getAttribute('data-type')))) {
+                this.blank();
             }
         }
     }, {
@@ -19017,12 +19008,12 @@ var Syntax = function (_AbstractRenderer_1$A) {
 }(AbstractRenderer_1.AbstractRenderer);
 
 exports.Syntax = Syntax;
-},{"./AbstractRenderer":94,"./util":83}],88:[function(require,module,exports) {
+},{"./AbstractRenderer":93,"./util":81}],86:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.welcome = encodeURIComponent("\n\n# $\\TeX$.ninja\n\n## Text\n\n- plain\n- *bold*\n- /italic/\n- _underline_\n\n## math\n\nInline $a \\leq b$ or block:\n\n$$\n\\int \\frac{1}{x}\\;dx = \\ln|x| + C\n$$\n\n## Images\n\n\\center\n![](https://goo.gl/22sw2D)\n\n\\begin{tikzpicture}\n\n\\foreach[count=\\i] \\s in {60,120,...,360}{\n  \\node[draw, circle](\\i) at (\\s:3) {$\\i$};\n}\n\\foreach \\i in {1,...,6}{\n  \\foreach \\j in {1,...,6}{\n    \\draw (\\i) to[bend right] (\\j);\n  }\n}\n\n\\end{tikzpicture}\n\\center\n\n\n--\n\n\\center\n[TeX.ninja](https://tex.ninja) - write $\\LaTeX$ like a Ninja.\n\\center\n\n\n");
-},{}],89:[function(require,module,exports) {
+exports.welcome = encodeURIComponent("\n\n# $\\TeX$.ninja\n\n## Text\n\n- plain\n- *bold*\n- /italic/\n- _underline_\n\n## Lists\n\n1. item 1\n  1. item 1.1\n2. item 2\n\n- item 1\n  - item 1.1\n- item 2\n\n## Math\n\nInline $a \\leq b$ or block:\n\n$$\n\\int \\frac{1}{x}\\;dx = \\ln|x| + C\n$$\n\n## Images\n\n\\center\n![](https://goo.gl/22sw2D)\n\n\\begin{tikzpicture}\n\n\\foreach[count=\\i] \\s in {60,120,...,360}{\n  \\node[draw, circle](\\i) at (\\s:3) {$\\i$};\n}\n\\foreach \\i in {1,...,6}{\n  \\foreach \\j in {1,...,6}{\n    \\draw (\\i) to[bend right] (\\j);\n  }\n}\n\n\\end{tikzpicture}\n\\center\n\n\n--\n\n\\center\n[TeX.ninja](https://tex.ninja) - write $\\LaTeX$ like a Ninja.\n\\center\n\n\n");
+},{}],87:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -19098,7 +19089,7 @@ var SyncCol = function () {
 }();
 
 exports.SyncCol = SyncCol;
-},{"./util":83}],18:[function(require,module,exports) {
+},{"./util":81}],17:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -19158,5 +19149,5 @@ document.addEventListener('DOMContentLoaded', function () {
     window.onhashchange = update;
     update();
 });
-},{"texdown":86,"../Html":82,"../Syntax":87,"../util":83,"../welcome":88,"../SyncCol":89}]},{},[18], null)
-//# sourceMappingURL=/edit.58cc8788.map
+},{"texdown":84,"../Html":80,"../Syntax":85,"../util":81,"../welcome":86,"../SyncCol":87}]},{},[17], null)
+//# sourceMappingURL=/edit.cac5dd44.map
