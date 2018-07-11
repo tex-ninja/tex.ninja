@@ -31,9 +31,9 @@ export class Html extends AbstractRenderer {
         el.setAttribute('data-sync', String(id))
     }
 
-    startElement(type: Element, id: number) {
+    startElement(elm: Element, id: number) {
+        const type = elm.type
         const el = e(type)
-        this.dirAuto(type, el)
         this.sync(el, id)
         this.push(el)
     }

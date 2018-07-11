@@ -1,4 +1,4 @@
-import { Element, Env, Renderer } from "texdown";
+import { Element, Env, Renderer, ElementType } from "texdown";
 import { e } from "./util";
 
 export abstract class AbstractRenderer implements Renderer {
@@ -20,12 +20,6 @@ export abstract class AbstractRenderer implements Renderer {
     public done() { }
     root = e('div')
     private stack: HTMLElement[] = [this.root]
-    private excludeDirAuto = ['b', 'u', 'i', 'li']
-
-    dirAuto(type: Element, el: HTMLElement) {
-        if (this.excludeDirAuto.includes(type)) return
-        el.dir = 'auto'
-    }
 
     reset() {
         this.root.innerHTML = ''

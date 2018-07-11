@@ -1,29 +1,38 @@
-import { Element, Env } from "texdown";
+import { Element, Env, ElementType } from "texdown";
 import { AbstractRenderer } from "./AbstractRenderer";
 import { e } from "./util";
 
-type token =
-    Element
+type TokenType =
+    ElementType
     | '' | '$' | '$$' | 'tikz' | 'a' | 'img'
     | 'hr'
-    | 'env'
+    | 'env-s' | 'env-e'
     | 'cmd'
 
 export class Syntax extends AbstractRenderer {
     cmd(name: string, arg: string): void {
-        const cmd = this.token('cmd')
-        cmd.innerText = `\\${name}{${arg}}`
+        const cmd = this.dataType('cmd', `\\${name}{${arg}}`)
         this.top().appendChild(cmd)
     }
 
-    private token(
-        type: token, id?: number) {
-        const el = e('span', {
+    private token(val: string) {
+        const tok = e('span')
+        tok.className = 'token'
+        tok.innerHTML = val
+        return tok
+    }
+
+    private dataType(type: TokenType, val: string, id?: number) {
+        const dt = e('span', {
             'data-type': type
         })
+
+        dt.appendChild(this.token(val))
+
         if (id)
-            el.setAttribute('data-sync', String(id))
-        return el
+            dt.setAttribute('data-sync', String(id))
+
+        return dt
     }
 
     private newLine() {
@@ -36,41 +45,32 @@ export class Syntax extends AbstractRenderer {
 
     hr() {
         this.clear()
-        const hr = this.token('hr')
-        hr.innerText = '--'
+        const hr = this.dataType('hr', '--')
         this.top().appendChild(hr)
     }
 
 
-    startElement(type: Element, id: number) {
-        const el = this.token(type, id)
-        this.dirAuto(type, el)
+    startElement(e: Element, id: number) {
+        const type = e.type
+        console.log(e)
+        const el = this.dataType(type, e.token, id)
         this.push(el)
-
-        if (type === 'p' || type === 'li')
-            this.push(this.newLine())
     }
 
-    endElement(type: Element) {
-        this.pop()
-
-        if (type === 'p' || type === 'li') {
-            const p = this.top()
-            p.removeChild(p.lastChild as Node)
-            this.pop()
+    endElement(e: Element) {
+        if (!['li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(e.type)) {
+            this.top().appendChild(this.token(e.token))
         }
+        this.pop()
     }
 
     startEnv(type: Env): void {
-        const env = this.token('env')
-        env.innerText = `\\${type}`
+        const env = this.dataType('env-s', `\\${type}`)
         this.top().appendChild(env)
     }
 
     endEnv(type: Env): void {
-        const env = this.token('env')
-        env.innerText = `\\${type}`
-        env.className = 'end'
+        const env = this.dataType('env-e', `\\${type}`)
         this.top().appendChild(env)
     }
 
@@ -79,7 +79,7 @@ export class Syntax extends AbstractRenderer {
     }
 
     txt(val: string) {
-        const txt = this.token('')
+        const txt = this.dataType('', val)
         txt.innerText = val
         this.top().appendChild(txt)
     }
@@ -96,32 +96,27 @@ export class Syntax extends AbstractRenderer {
     }
 
     a(title: string, href: string, id: number) {
-        const a = this.token('a', id)
-        a.innerText = `[${title}](${href})`
+        const a = this.dataType('a', `[${title}](${href})`, id)
         this.top().appendChild(a)
     }
 
     img(title: string, src: string, id: number) {
-        const img = this.token('img', id)
-        img.innerText = `![${title}](${src})`
+        const img = this.dataType('img', `![${title}](${src})`, id)
         this.top().appendChild(img)
     }
 
     $(tex: string, id: number) {
-        const $ = this.token('$', id)
-        $.innerText = tex
+        const $ = this.dataType('$', tex, id)
         this.top().appendChild($)
     }
 
     $$(tex: string, id: number) {
-        const $$ = this.token('$$', id)
-        $$.innerHTML = tex
+        const $$ = this.dataType('$$', tex, id)
         this.top().appendChild($$)
     }
 
     tikz(val: string, id: number) {
-        const tikz = this.token('tikz', id)
-        tikz.innerText = val
+        const tikz = this.dataType('tikz', val, id)
         this.top().appendChild(tikz)
     }
 }
