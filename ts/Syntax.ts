@@ -85,7 +85,6 @@ export class Syntax extends AbstractRenderer {
     }
 
     txt(val: string) {
-        console.log('txt', val)
         this.top().appendChild(this.dataType('', val))
     }
 

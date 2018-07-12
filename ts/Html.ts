@@ -33,7 +33,7 @@ export class Html extends AbstractRenderer {
 
     startElement(elm: Element, id: number) {
         const type = elm.type
-        const el = e(type)
+        const el = e(type, { dir: 'auto' })
         this.sync(el, id)
         this.push(el)
     }
