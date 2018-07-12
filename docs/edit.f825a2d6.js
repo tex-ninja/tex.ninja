@@ -98,7 +98,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   // Override the current require with this new one
   return newRequire;
-})({98:[function(require,module,exports) {
+})({85:[function(require,module,exports) {
 var define;
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -563,7 +563,7 @@ var define;
 
 }))
 
-},{}],92:[function(require,module,exports) {
+},{}],84:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const moo = require("moo");
@@ -788,7 +788,7 @@ function texDown(markDown, ...renderers) {
 }
 exports.texDown = texDown;
 
-},{"moo":98}],94:[function(require,module,exports) {
+},{"moo":85}],86:[function(require,module,exports) {
 var define;
 var global = arguments[3];
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -18625,7 +18625,7 @@ module.exports = { "default": __webpack_require__(119), __esModule: true };
 /***/ })
 /******/ ])["default"];
 });
-},{}],84:[function(require,module,exports) {
+},{}],75:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -18654,7 +18654,7 @@ function debounce(f, timeout) {
     };
 }
 exports.debounce = debounce;
-},{}],95:[function(require,module,exports) {
+},{}],87:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18710,7 +18710,7 @@ var AbstractRenderer = function () {
 }();
 
 exports.AbstractRenderer = AbstractRenderer;
-},{"./util":84}],82:[function(require,module,exports) {
+},{"./util":75}],74:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18777,7 +18777,7 @@ var Html = function (_AbstractRenderer_1$A) {
         key: "startElement",
         value: function startElement(elm, id) {
             var type = elm.type;
-            var el = util_1.e(type);
+            var el = util_1.e(type, { dir: 'auto' });
             this.sync(el, id);
             this.push(el);
         }
@@ -18861,18 +18861,302 @@ var Html = function (_AbstractRenderer_1$A) {
 }(AbstractRenderer_1.AbstractRenderer);
 
 exports.Html = Html;
-},{"katex":94,"./AbstractRenderer":95,"./util":84}],16:[function(require,module,exports) {
+},{"katex":86,"./AbstractRenderer":87,"./util":75}],76:[function(require,module,exports) {
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var AbstractRenderer_1 = require("./AbstractRenderer");
+var util_1 = require("./util");
+
+var Syntax = function (_AbstractRenderer_1$A) {
+    _inherits(Syntax, _AbstractRenderer_1$A);
+
+    function Syntax() {
+        _classCallCheck(this, Syntax);
+
+        return _possibleConstructorReturn(this, (Syntax.__proto__ || Object.getPrototypeOf(Syntax)).apply(this, arguments));
+    }
+
+    _createClass(Syntax, [{
+        key: "cmd",
+        value: function cmd(name, arg) {
+            var cmd = this.dataType('cmd', "\\" + name + "{" + arg + "}");
+            this.top().appendChild(cmd);
+        }
+    }, {
+        key: "token",
+        value: function token(val) {
+            var tok = util_1.e('span');
+            tok.className = 'token';
+            tok.innerHTML = val;
+            return tok;
+        }
+    }, {
+        key: "dataType",
+        value: function dataType(type, val, id) {
+            var dt = util_1.e('span', {
+                'data-type': type
+            });
+            dt.appendChild(this.token(val));
+            if (id) dt.setAttribute('data-sync', String(id));
+            return dt;
+        }
+    }, {
+        key: "hr",
+        value: function hr() {
+            this.clear();
+            var hr = this.dataType('hr', '--');
+            this.top().appendChild(hr);
+        }
+    }, {
+        key: "pushLine",
+        value: function pushLine() {
+            var div = util_1.e('div');
+            div.dir = 'auto';
+            div.className = 'line';
+            this.push(div);
+        }
+    }, {
+        key: "startElement",
+        value: function startElement(e, id) {
+            if (!['b', 'i', 'u'].includes(e.type)) {
+                this.pushLine();
+            }
+            var type = e.type;
+            var el = this.dataType(type, e.token, id);
+            this.push(el);
+        }
+    }, {
+        key: "popLine",
+        value: function popLine() {
+            if (this.top().className === 'line') this.pop();
+        }
+    }, {
+        key: "endElement",
+        value: function endElement(e) {
+            if (!['li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(e.type)) {
+                this.top().appendChild(this.token(e.token));
+            }
+            this.popLine();
+            this.pop();
+        }
+    }, {
+        key: "startEnv",
+        value: function startEnv(type) {
+            var env = this.dataType('env-s', "\\" + type);
+            this.top().appendChild(env);
+        }
+    }, {
+        key: "endEnv",
+        value: function endEnv(type) {
+            var env = this.dataType('env-e', "\\" + type);
+            this.top().appendChild(env);
+        }
+    }, {
+        key: "esc",
+        value: function esc(val) {
+            this.txt(val);
+        }
+    }, {
+        key: "txt",
+        value: function txt(val) {
+            this.top().appendChild(this.dataType('', val));
+        }
+    }, {
+        key: "eol",
+        value: function eol() {
+            this.popLine();
+            this.pushLine();
+        }
+    }, {
+        key: "blank",
+        value: function blank() {
+            this.top().appendChild(util_1.e('br'));
+        }
+    }, {
+        key: "a",
+        value: function a(title, href, id) {
+            var a = this.dataType('a', "[" + title + "](" + href + ")", id);
+            this.top().appendChild(a);
+        }
+    }, {
+        key: "img",
+        value: function img(title, src, id) {
+            var img = this.dataType('img', "![" + title + "](" + src + ")", id);
+            this.top().appendChild(img);
+        }
+    }, {
+        key: "$",
+        value: function $(tex, id) {
+            var $ = this.dataType('$', tex, id);
+            this.top().appendChild($);
+        }
+    }, {
+        key: "$$",
+        value: function $$(tex, id) {
+            var $$ = this.dataType('$$', tex, id);
+            this.top().appendChild($$);
+        }
+    }, {
+        key: "tikz",
+        value: function tikz(val, id) {
+            var tikz = this.dataType('tikz', val, id);
+            this.top().appendChild(tikz);
+        }
+    }]);
+
+    return Syntax;
+}(AbstractRenderer_1.AbstractRenderer);
+
+exports.Syntax = Syntax;
+},{"./AbstractRenderer":87,"./util":75}],77:[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.welcome = encodeURIComponent("\n\n# $\\TeX$.ninja\n\n## Text\n\n- plain\n- *bold*\n- /italic/\n- _underline_\n\n## Lists\n\n1. item 1\n  1. item 1.1\n2. item 2\n\n- item 1\n  - item 1.1\n- item 2\n\n## Math\n\nInline $a \\leq b$ or block:\n\n$$\n\\int \\frac{1}{x}\\;dx = \\ln|x| + C\n$$\n\n## Images\n\n\\center\n![](https://goo.gl/22sw2D)\n\n\\begin{tikzpicture}\n\n\\foreach[count=\\i] \\s in {60,120,...,360}{\n  \\node[draw, circle](\\i) at (\\s:3) {$\\i$};\n}\n\\foreach \\i in {1,...,6}{\n  \\foreach \\j in {1,...,6}{\n    \\draw (\\i) to[bend right] (\\j);\n  }\n}\n\n\\end{tikzpicture}\n\\center\n\n\n--\n\n\\center\n[TeX.ninja](https://tex.ninja) - write $\\LaTeX$ like a Ninja.\n\\center\n\n\n");
+},{}],78:[function(require,module,exports) {
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var util_1 = require("./util");
+var highlight = function highlight(e) {
+    e.className = 'highlight';
+    setTimeout(function () {
+        e.className = '';
+    }, 2000);
+};
+
+var SyncCol = function () {
+    function SyncCol(e, onScroll) {
+        var _this = this;
+
+        _classCallCheck(this, SyncCol);
+
+        this.firstVisibleKid = function () {
+            var scrollTop = _this.e.scrollTop;
+            var kids = _this.e.querySelectorAll('[data-sync]');
+            for (var i = 0; i < kids.length; i++) {
+                var _e = kids.item(i);
+                if (_e.offsetTop > scrollTop) return _e;
+            }
+            return kids.item(kids.length - 1);
+        };
+        this.lastVisibleKid = function () {
+            var scrollTop = _this.e.scrollTop + _this.e.clientHeight;
+            var kids = _this.e.querySelectorAll('[data-sync]');
+            for (var i = 0; i < kids.length; i++) {
+                var _e2 = kids.item(i);
+                if (_e2.offsetTop + _e2.scrollHeight > scrollTop) return kids.item(i - 1);
+            }
+            return kids.item(kids.length - 1);
+        };
+        this.e = e;
+        this.scrollTop = e.scrollTop;
+        this.onScroll = util_1.debounce(function () {
+            var down = _this.scrollTop < _this.e.scrollTop;
+            _this.scrollTop = _this.e.scrollTop;
+            var kid = down ? _this.lastVisibleKid() : _this.firstVisibleKid();
+            highlight(kid);
+            onScroll(parseInt(kid.getAttribute('data-sync')), down);
+        }, 300);
+        e.addEventListener('scroll', util_1.debounce(function () {
+            e.addEventListener('scroll', _this.onScroll);
+        }, 300));
+    }
+
+    _createClass(SyncCol, [{
+        key: "pause",
+        value: function pause() {
+            this.e.removeEventListener('scroll', this.onScroll);
+        }
+    }, {
+        key: "scrollTo",
+        value: function scrollTo(dataSync, down) {
+            var e = this.e.querySelector("[data-sync=\"" + dataSync + "\"]");
+            if (e === null) return;
+            highlight(e);
+            this.pause();
+            e.scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+    }]);
+
+    return SyncCol;
+}();
+
+exports.SyncCol = SyncCol;
+},{"./util":75}],9:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var texdown_1 = require("texdown");
 var Html_1 = require("../Html");
+var Syntax_1 = require("../Syntax");
 var util_1 = require("../util");
+var welcome_1 = require("../welcome");
+var SyncCol_1 = require("../SyncCol");
 document.addEventListener('DOMContentLoaded', function () {
-    var content = document.getElementById('content');
+    var get = function get(id) {
+        return document.getElementById(id);
+    };
+    var input = get('input');
+    var editor = get('editor');
+    var output = get('output');
+    var editorCol = new SyncCol_1.SyncCol(get('lcol'), function (dataSync, down) {
+        viewCol.scrollTo(dataSync, down);
+    });
+    var viewCol = new SyncCol_1.SyncCol(get('rcol'), function (dataSync, down) {
+        editorCol.scrollTo(dataSync, down);
+    });
     var html = new Html_1.Html();
-    texdown_1.texDown(util_1.readHash() + '\n', html);
-    content.appendChild(html.root);
+    var syntax = new Syntax_1.Syntax();
+    var update = function update() {
+        viewCol.pause();
+        syntax.reset();
+        html.reset();
+        var tex = util_1.readHash() + '\n';
+        texdown_1.texDown(tex, html, syntax);
+        requestAnimationFrame(function () {
+            window.parent.postMessage(tex, '*');
+            editor.innerHTML = '';
+            editor.appendChild(syntax.root);
+            output.innerHTML = '';
+            output.appendChild(html.root);
+            input.style.height = editor.scrollHeight + 40 + 'px';
+        });
+    };
+    input.addEventListener('keydown', function (e) {
+        if (e.keyCode !== 9) return;
+        var start = input.selectionStart;
+        var end = input.selectionEnd;
+        var value = input.value;
+        var space = '  ';
+        input.value = value.substring(0, start) + space + value.substring(end);
+        input.selectionStart = input.selectionEnd = start + space.length;
+        e.preventDefault();
+        window.location.hash = encodeURIComponent(input.value);
+    });
+    input.addEventListener('input', function () {
+        window.location.hash = encodeURIComponent(input.value);
+    });
+    if (window.location.hash.length <= 1) window.location.hash = welcome_1.welcome;
+    input.value = util_1.readHash();
+    editor.focus();
+    window.onhashchange = update;
+    update();
 });
-},{"texdown":92,"../Html":82,"../util":84}]},{},[16], null)
-//# sourceMappingURL=/view.86860eb6.map
+},{"texdown":84,"../Html":74,"../Syntax":76,"../util":75,"../welcome":77,"../SyncCol":78}]},{},[9], null)
+//# sourceMappingURL=/edit.f825a2d6.map
