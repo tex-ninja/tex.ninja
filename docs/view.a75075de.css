@@ -3,7 +3,7 @@ body {
 
 #content {
   width: 21cm;
-  margin: 1em auto; }
+  margin: 5em auto; }
 
 @media print {
   html,
