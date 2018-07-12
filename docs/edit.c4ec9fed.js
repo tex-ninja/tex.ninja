@@ -98,7 +98,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   // Override the current require with this new one
   return newRequire;
-})({91:[function(require,module,exports) {
+})({98:[function(require,module,exports) {
 var define;
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -563,7 +563,7 @@ var define;
 
 }))
 
-},{}],84:[function(require,module,exports) {
+},{}],92:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const moo = require("moo");
@@ -788,7 +788,7 @@ function texDown(markDown, ...renderers) {
 }
 exports.texDown = texDown;
 
-},{"moo":91}],92:[function(require,module,exports) {
+},{"moo":98}],94:[function(require,module,exports) {
 var define;
 var global = arguments[3];
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -18625,24 +18625,20 @@ module.exports = { "default": __webpack_require__(119), __esModule: true };
 /***/ })
 /******/ ])["default"];
 });
-},{}],81:[function(require,module,exports) {
+},{}],84:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.readHash = function () {
     return decodeURIComponent(window.location.hash.substr(1));
 };
-var excludeDirAuto = ['b', 'u', 'i', 'li'];
 exports.e = function (name) {
     var atts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
     var e = document.createElement(name);
     for (var k in atts) {
         e.setAttribute(k, atts[k]);
-    }if (!excludeDirAuto.includes(name)) {
-        e.dir = 'auto';
-    }
-    return e;
+    }return e;
 };
 function debounce(f, timeout) {
     var to = void 0;
@@ -18658,7 +18654,7 @@ function debounce(f, timeout) {
     };
 }
 exports.debounce = debounce;
-},{}],93:[function(require,module,exports) {
+},{}],95:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18714,7 +18710,7 @@ var AbstractRenderer = function () {
 }();
 
 exports.AbstractRenderer = AbstractRenderer;
-},{"./util":81}],80:[function(require,module,exports) {
+},{"./util":84}],82:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18865,7 +18861,7 @@ var Html = function (_AbstractRenderer_1$A) {
 }(AbstractRenderer_1.AbstractRenderer);
 
 exports.Html = Html;
-},{"katex":92,"./AbstractRenderer":93,"./util":81}],85:[function(require,module,exports) {
+},{"katex":94,"./AbstractRenderer":95,"./util":84}],83:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18921,12 +18917,27 @@ var Syntax = function (_AbstractRenderer_1$A) {
             this.top().appendChild(hr);
         }
     }, {
+        key: "pushLine",
+        value: function pushLine() {
+            var div = util_1.e('div');
+            div.dir = 'auto';
+            div.className = 'line';
+            this.push(div);
+        }
+    }, {
         key: "startElement",
         value: function startElement(e, id) {
+            if (!['b', 'i', 'u'].includes(e.type)) {
+                this.pushLine();
+            }
             var type = e.type;
-            console.log(e);
             var el = this.dataType(type, e.token, id);
             this.push(el);
+        }
+    }, {
+        key: "popLine",
+        value: function popLine() {
+            if (this.top().className === 'line') this.pop();
         }
     }, {
         key: "endElement",
@@ -18934,6 +18945,7 @@ var Syntax = function (_AbstractRenderer_1$A) {
             if (!['li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(e.type)) {
                 this.top().appendChild(this.token(e.token));
             }
+            this.popLine();
             this.pop();
         }
     }, {
@@ -18956,16 +18968,14 @@ var Syntax = function (_AbstractRenderer_1$A) {
     }, {
         key: "txt",
         value: function txt(val) {
-            var txt = this.dataType('', val);
-            txt.innerText = val;
-            this.top().appendChild(txt);
+            console.log('txt', val);
+            this.top().appendChild(this.dataType('', val));
         }
     }, {
         key: "eol",
         value: function eol() {
-            if (['li', 'p'].includes(String(this.top().getAttribute('data-type')))) {
-                this.blank();
-            }
+            this.popLine();
+            this.pushLine();
         }
     }, {
         key: "blank",
@@ -19008,12 +19018,12 @@ var Syntax = function (_AbstractRenderer_1$A) {
 }(AbstractRenderer_1.AbstractRenderer);
 
 exports.Syntax = Syntax;
-},{"./AbstractRenderer":93,"./util":81}],86:[function(require,module,exports) {
+},{"./AbstractRenderer":95,"./util":84}],85:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.welcome = encodeURIComponent("\n\n# $\\TeX$.ninja\n\n## Text\n\n- plain\n- *bold*\n- /italic/\n- _underline_\n\n## Lists\n\n1. item 1\n  1. item 1.1\n2. item 2\n\n- item 1\n  - item 1.1\n- item 2\n\n## Math\n\nInline $a \\leq b$ or block:\n\n$$\n\\int \\frac{1}{x}\\;dx = \\ln|x| + C\n$$\n\n## Images\n\n\\center\n![](https://goo.gl/22sw2D)\n\n\\begin{tikzpicture}\n\n\\foreach[count=\\i] \\s in {60,120,...,360}{\n  \\node[draw, circle](\\i) at (\\s:3) {$\\i$};\n}\n\\foreach \\i in {1,...,6}{\n  \\foreach \\j in {1,...,6}{\n    \\draw (\\i) to[bend right] (\\j);\n  }\n}\n\n\\end{tikzpicture}\n\\center\n\n\n--\n\n\\center\n[TeX.ninja](https://tex.ninja) - write $\\LaTeX$ like a Ninja.\n\\center\n\n\n");
-},{}],87:[function(require,module,exports) {
+},{}],86:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -19089,7 +19099,7 @@ var SyncCol = function () {
 }();
 
 exports.SyncCol = SyncCol;
-},{"./util":81}],17:[function(require,module,exports) {
+},{"./util":84}],13:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -19149,5 +19159,5 @@ document.addEventListener('DOMContentLoaded', function () {
     window.onhashchange = update;
     update();
 });
-},{"texdown":84,"../Html":80,"../Syntax":85,"../util":81,"../welcome":86,"../SyncCol":87}]},{},[17], null)
-//# sourceMappingURL=/edit.cac5dd44.map
+},{"texdown":92,"../Html":82,"../Syntax":83,"../util":84,"../welcome":85,"../SyncCol":86}]},{},[13], null)
+//# sourceMappingURL=/edit.c4ec9fed.map

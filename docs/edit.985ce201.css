@@ -79,8 +79,7 @@ textarea#input,
   white-space: pre-wrap; }
 
 [data-type^='h'] {
-  color: black;
-  font-weight: bold; }
+  color: black; }
   [data-type^='h'] > .token {
     color: orange; }
 
@@ -119,8 +118,7 @@ textarea#input,
   color: coral; }
 
 [data-type='b'] {
-  color: black;
-  font-weight: bold; }
+  color: black; }
 
 [data-type='i'] {
   font-style: italic; }
