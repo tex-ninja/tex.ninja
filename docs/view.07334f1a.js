@@ -18777,7 +18777,10 @@ var Html = function (_AbstractRenderer_1$A) {
         key: "startElement",
         value: function startElement(elm, id) {
             var type = elm.type;
-            var el = util_1.e(type, { dir: 'auto' });
+            var el = util_1.e(type);
+            if (!['li'].includes(type)) {
+                el.dir = 'auto';
+            }
             this.sync(el, id);
             this.push(el);
         }
@@ -18875,4 +18878,4 @@ document.addEventListener('DOMContentLoaded', function () {
     content.appendChild(html.root);
 });
 },{"texdown":84,"../Html":74,"../util":75}]},{},[7], null)
-//# sourceMappingURL=/view.3f79b870.map
+//# sourceMappingURL=/view.07334f1a.map

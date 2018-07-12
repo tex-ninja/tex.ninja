@@ -18777,7 +18777,10 @@ var Html = function (_AbstractRenderer_1$A) {
         key: "startElement",
         value: function startElement(elm, id) {
             var type = elm.type;
-            var el = util_1.e(type, { dir: 'auto' });
+            var el = util_1.e(type);
+            if (!['li'].includes(type)) {
+                el.dir = 'auto';
+            }
             this.sync(el, id);
             this.push(el);
         }
@@ -19159,4 +19162,4 @@ document.addEventListener('DOMContentLoaded', function () {
     update();
 });
 },{"texdown":84,"../Html":74,"../Syntax":76,"../util":75,"../welcome":77,"../SyncCol":78}]},{},[9], null)
-//# sourceMappingURL=/edit.f825a2d6.map
+//# sourceMappingURL=/edit.0f7f1784.map
