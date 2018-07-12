@@ -1,4 +1,4 @@
-import { Element, Env, ElementType } from "texdown";
+import { Element, ElementType } from "texdown";
 import { AbstractRenderer } from "./AbstractRenderer";
 import { e } from "./util";
 
@@ -8,80 +8,84 @@ type TokenType =
     | 'hr'
     | 'env-s' | 'env-e'
     | 'cmd'
+    | '-'
+
+const multiline = ['p', 'li']
+const inline = ['b', 'u', 'i']
 
 export class Syntax extends AbstractRenderer {
-    cmd(name: string, arg: string): void {
-        const cmd = this.element('cmd', `\\${name}{${arg}}`)
-        this.top().appendChild(cmd)
-    }
-
-    private token(val: string) {
-        const tok = e('span')
-        tok.className = 'token'
-        tok.innerHTML = val
-        return tok
-    }
-
-    private element(type: TokenType, val: string, id?: number) {
-        const dt = e('span', {
+    private append(type: TokenType, id?: number) {
+        const el = e('span', {
             'data-type': type
         })
 
-        dt.appendChild(this.token(val))
+        if (id) {
+            el.setAttribute('data-sync', String(id))
+        }
 
-        if (id)
-            dt.setAttribute('data-sync', String(id))
+        this.top().appendChild(el)
 
-        return dt
+        return el
+    }
+
+    private appendAndSetText(type: TokenType, val: string, id?: number) {
+        const el = this.append(type, id)
+        el.innerHTML = val
+        return el
+    }
+
+    private appendAndPush(type: TokenType, id?: number) {
+        const el = this.append(type, id)
+        this.push(el)
+        if (multiline.includes(type)) this.pushLine()
+        return el
     }
 
     hr() {
         this.clear()
-        const hr = this.element('hr', '--')
-        this.top().appendChild(hr)
+        this.appendAndSetText('hr', '--')
     }
 
 
-    private pushDirAutoBlock() {
+    private pushLine() {
         const div = e('div')
         div.dir = 'auto'
-        div.className = 'dir-auto'
+        div.className = 'line'
         this.push(div)
     }
 
-    private popDirAutoBlocks() {
-        while (this.top().className === 'dir-auto') this.pop()
+    private popLines() {
+        while (this.top().className === 'line') this.pop()
     }
 
     startElement(e: Element, id: number) {
         console.log('<', e.type)
-        if (!['b', 'i', 'u'].includes(e.type)) {
-            this.pushDirAutoBlock()
-        }
         const type = e.type
-        const el = this.element(type, e.token, id)
-        this.push(el)
+
+        if (!inline.includes(type)
+            && !multiline.includes(type)) {
+            this.pushLine()
+        }
+
+        this.appendAndPush(type, id)
+        if (e.type === 'li') this.appendAndSetText('-', e.token)
     }
 
     endElement(e: Element) {
         console.log(e.type, '>')
-        if (!['li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(e.type)) {
-            this.top().appendChild(this.token(e.token))
-        }
-        this.popDirAutoBlocks()
+        while (this.top().getAttribute('data-type') !== e.type) this.pop()
         this.pop()
-        this.popDirAutoBlocks()
     }
 
-    startEnv(type: Env): void {
-        console.log('<', type)
-        const env = this.element('env-s', `\\${type}`)
+    startEnv(name: string): void {
+        console.log('<', name)
+        const env = this.appendAndSetText('env-s', `\\${name}`)
         this.top().appendChild(env)
     }
 
-    endEnv(type: Env): void {
-        console.log(type, '>')
-        const env = this.element('env-e', `\\${type}`)
+    endEnv(name: string): void {
+        console.log(name, '>')
+        const env = this.appendAndSetText('env-e', `\\${name}`)
         this.top().appendChild(env)
     }
 
@@ -90,47 +94,44 @@ export class Syntax extends AbstractRenderer {
     }
 
     txt(val: string) {
-        console.log('t', val)
-        this.top().appendChild(this.element('', val))
+        console.log('t', val, val.indexOf('\n'))
+        this.top().appendChild(this.appendAndSetText('', val))
     }
 
     eol() {
         console.log('eol')
-        this.popDirAutoBlocks()
-        const dataType = this.top().getAttribute('data-type')
-        if (dataType && ['p', 'li'].includes(dataType)) {
-            this.pushDirAutoBlock()
-        }
+        this.popLines()
+        this.pushLine()
     }
 
     blank() {
+        this.clear()
         this.top().appendChild(e('br'))
     }
 
     a(title: string, href: string, id: number) {
         console.log('a')
-        const a = this.element('a', `[${title}](${href})`, id)
-        this.top().appendChild(a)
+        this.appendAndSetText('a', `[${title}](${href})`, id)
     }
 
     img(title: string, src: string, id: number) {
-        const img = this.element('img', `![${title}](${src})`, id)
-        this.top().appendChild(img)
+        this.appendAndSetText('img', `![${title}](${src})`, id)
     }
 
     $(tex: string, id: number) {
-        const $ = this.element('$', tex, id)
-        this.top().appendChild($)
+        this.appendAndSetText('$', tex, id)
     }
 
     $$(tex: string, id: number) {
-        this.pushDirAutoBlock()
-        const $$ = this.element('$$', tex, id)
-        this.top().appendChild($$)
+        this.appendAndSetText('$$', tex, id)
     }
 
     tikz(val: string, id: number) {
-        const tikz = this.element('tikz', val, id)
-        this.top().appendChild(tikz)
+        console.log('tikz')
+        this.appendAndSetText('tikz', val, id)
+    }
+
+    cmd(name: string, arg: string): void {
+        this.appendAndSetText('cmd', `\\${name}{${arg}}`)
     }
 }
