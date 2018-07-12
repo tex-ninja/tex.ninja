@@ -33,7 +33,10 @@ export class Html extends AbstractRenderer {
 
     startElement(elm: Element, id: number) {
         const type = elm.type
-        const el = e(type, { dir: 'auto' })
+        const el = e(type)
+        if (!['li'].includes(type)) {
+            el.dir = 'auto'
+        }
         this.sync(el, id)
         this.push(el)
     }
