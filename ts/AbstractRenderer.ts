@@ -19,7 +19,7 @@ export abstract class AbstractRenderer implements Renderer {
     abstract esc(val: string): void
     public done() { }
     root = e('div')
-    private stack: HTMLElement[] = [this.root]
+    stack: HTMLElement[] = [this.root]
 
     reset() {
         this.root.innerHTML = ''

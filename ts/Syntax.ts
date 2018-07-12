@@ -11,7 +11,7 @@ type TokenType =
 
 export class Syntax extends AbstractRenderer {
     cmd(name: string, arg: string): void {
-        const cmd = this.dataType('cmd', `\\${name}{${arg}}`)
+        const cmd = this.element('cmd', `\\${name}{${arg}}`)
         this.top().appendChild(cmd)
     }
 
@@ -22,7 +22,7 @@ export class Syntax extends AbstractRenderer {
         return tok
     }
 
-    private dataType(type: TokenType, val: string, id?: number) {
+    private element(type: TokenType, val: string, id?: number) {
         const dt = e('span', {
             'data-type': type
         })
@@ -37,7 +37,7 @@ export class Syntax extends AbstractRenderer {
 
     hr() {
         this.clear()
-        const hr = this.dataType('hr', '--')
+        const hr = this.element('hr', '--')
         this.top().appendChild(hr)
     }
 
@@ -49,34 +49,39 @@ export class Syntax extends AbstractRenderer {
         this.push(div)
     }
 
-    startElement(e: Element, id: number) {
-        if (!['b', 'i', 'u'].includes(e.type)) {
-            this.pushDirAutoBlock()
-        }
-        const type = e.type
-        const el = this.dataType(type, e.token, id)
-        this.push(el)
-    }
-
     private popDirAutoBlocks() {
         while (this.top().className === 'dir-auto') this.pop()
     }
 
+    startElement(e: Element, id: number) {
+        console.log('<', e.type)
+        if (!['b', 'i', 'u'].includes(e.type)) {
+            this.pushDirAutoBlock()
+        }
+        const type = e.type
+        const el = this.element(type, e.token, id)
+        this.push(el)
+    }
+
     endElement(e: Element) {
+        console.log(e.type, '>')
         if (!['li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(e.type)) {
             this.top().appendChild(this.token(e.token))
         }
+        this.popDirAutoBlocks()
         this.pop()
         this.popDirAutoBlocks()
     }
 
     startEnv(type: Env): void {
-        const env = this.dataType('env-s', `\\${type}`)
+        console.log('<', type)
+        const env = this.element('env-s', `\\${type}`)
         this.top().appendChild(env)
     }
 
     endEnv(type: Env): void {
-        const env = this.dataType('env-e', `\\${type}`)
+        console.log(type, '>')
+        const env = this.element('env-e', `\\${type}`)
         this.top().appendChild(env)
     }
 
@@ -85,12 +90,17 @@ export class Syntax extends AbstractRenderer {
     }
 
     txt(val: string) {
-        this.top().appendChild(this.dataType('', val))
+        console.log('t', val)
+        this.top().appendChild(this.element('', val))
     }
 
     eol() {
+        console.log('eol')
         this.popDirAutoBlocks()
-        this.pushDirAutoBlock()
+        const dataType = this.top().getAttribute('data-type')
+        if (dataType && ['p', 'li'].includes(dataType)) {
+            this.pushDirAutoBlock()
+        }
     }
 
     blank() {
@@ -98,28 +108,29 @@ export class Syntax extends AbstractRenderer {
     }
 
     a(title: string, href: string, id: number) {
-        const a = this.dataType('a', `[${title}](${href})`, id)
+        console.log('a')
+        const a = this.element('a', `[${title}](${href})`, id)
         this.top().appendChild(a)
     }
 
     img(title: string, src: string, id: number) {
-        const img = this.dataType('img', `![${title}](${src})`, id)
+        const img = this.element('img', `![${title}](${src})`, id)
         this.top().appendChild(img)
     }
 
     $(tex: string, id: number) {
-        const $ = this.dataType('$', tex, id)
+        const $ = this.element('$', tex, id)
         this.top().appendChild($)
     }
 
     $$(tex: string, id: number) {
         this.pushDirAutoBlock()
-        const $$ = this.dataType('$$', tex, id)
+        const $$ = this.element('$$', tex, id)
         this.top().appendChild($$)
     }
 
     tikz(val: string, id: number) {
-        const tikz = this.dataType('tikz', val, id)
+        const tikz = this.element('tikz', val, id)
         this.top().appendChild(tikz)
     }
 }
