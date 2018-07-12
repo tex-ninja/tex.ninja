@@ -1,3 +1,6 @@
+body {
+  border: 1px solid transparent; }
+
 #content {
   width: 21cm;
   margin: 1em auto; }
