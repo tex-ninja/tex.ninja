@@ -98,7 +98,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   // Override the current require with this new one
   return newRequire;
-})({80:[function(require,module,exports) {
+})({96:[function(require,module,exports) {
 var define;
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -563,7 +563,7 @@ var define;
 
 }))
 
-},{}],78:[function(require,module,exports) {
+},{}],85:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const moo = require("moo");
@@ -593,41 +593,41 @@ const tokens = {
     eol: { match: /\n/, lineBreaks: true }
 };
 function texDown(markDown, ...renderers) {
-    let currentToken;
     const lexer = moo.compile(tokens);
     lexer.reset(markDown);
-    const elements = [];
-    const envs = {
-        center: false
-    };
     let id = 0;
-    const topElement = () => elements[elements.length - 1];
+    let currentToken;
+    const stack = [];
+    const env = {};
+    const topElement = () => stack[stack.length - 1];
     const popElement = () => {
-        const el = elements.pop();
+        const el = stack.pop();
         renderers.forEach(r => r.endElement(el));
     };
-    const endEnv = (env) => {
-        envs[env] = false;
-        renderers.forEach(r => r.endEnv(env));
+    const endEnv = (name) => {
+        env[name] = false;
+        renderers.forEach(r => r.endEnv(name));
     };
     const clearElements = () => {
-        while (elements.length)
+        while (stack.length)
             popElement();
     };
     const clearEnvs = () => {
         renderers.forEach(r => {
-            if (envs.center)
-                r.endEnv('center');
+            Object.entries(env).forEach(([name, b]) => {
+                if (b)
+                    r.endEnv(name);
+            });
         });
     };
     const pushElement = (el) => {
-        elements.push(el);
+        stack.push(el);
         renderers.forEach(r => r.startElement(el, id));
         return el;
     };
-    const startEnv = (env) => {
-        envs[env] = true;
-        renderers.forEach(r => r.startEnv(env));
+    const startEnv = (e) => {
+        env[e] = true;
+        renderers.forEach(r => r.startEnv(e));
     };
     const h = (type) => {
         clearElements();
@@ -637,11 +637,11 @@ function texDown(markDown, ...renderers) {
         });
     };
     const format = (type) => {
-        if (elements.length && topElement().type === type) {
+        if (stack.length && topElement().type === type) {
             popElement();
             return;
         }
-        if (!elements.length)
+        if (!stack.length)
             pushElement({
                 type: 'p',
                 token: ''
@@ -659,7 +659,7 @@ function texDown(markDown, ...renderers) {
                 && ['ul', 'ol'].includes(te.type)
                 && te.data <= nestLevel;
         };
-        while (elements.length && !matchingList()) {
+        while (stack.length && !matchingList()) {
             popElement();
         }
         const te = topElement();
@@ -685,6 +685,13 @@ function texDown(markDown, ...renderers) {
         const res = reCmd.exec(cmd);
         return [res[1], res[2]];
     };
+    const pushParIfEmpty = () => {
+        if (!stack.length)
+            pushElement({
+                type: 'p',
+                token: ''
+            });
+    };
     const actions = {
         h6: () => h('h6'),
         h5: () => h('h5'),
@@ -698,20 +705,12 @@ function texDown(markDown, ...renderers) {
         uli: () => li('ul'),
         oli: () => li('ol'),
         a: () => {
-            if (!elements.length)
-                pushElement({
-                    type: 'p',
-                    token: ''
-                });
+            pushParIfEmpty();
             const [title, href] = extractLink(currentToken.text);
             renderers.forEach(r => r.a(title, href, id));
         },
         img: () => {
-            if (!elements.length)
-                pushElement({
-                    type: 'p',
-                    token: ''
-                });
+            pushParIfEmpty();
             const [title, href] = extractLink(currentToken.text);
             renderers.forEach(r => r.img(title, href, id));
         },
@@ -722,30 +721,28 @@ function texDown(markDown, ...renderers) {
             renderers.forEach(r => r.$$(tex, id));
         },
         $: () => {
-            if (!elements.length)
-                pushElement({
-                    type: 'p',
-                    token: ''
-                });
+            pushParIfEmpty();
             const txt = currentToken.text;
             const tex = txt.substring(1, txt.length - 1);
             renderers.forEach(r => r.$(tex, id));
         },
         env: () => {
-            const env = currentToken.text.substr(1);
             clearElements();
-            if (envs[env])
-                endEnv(env);
+            const e = currentToken.text.substr(1);
+            if (env[e])
+                endEnv(e);
             else
-                startEnv(env);
+                startEnv(e);
         },
         cmd: () => {
+            clearElements();
             const [name, arg] = extractCmd(currentToken.text);
             renderers.forEach(r => {
                 r.cmd(name, arg);
             });
         },
         tikz: () => {
+            clearElements();
             renderers.forEach(r => r.tikz(currentToken.text, id));
         },
         hr: () => {
@@ -756,11 +753,7 @@ function texDown(markDown, ...renderers) {
             renderers.forEach(r => r.esc(currentToken.text));
         },
         txt: () => {
-            if (!elements.length)
-                pushElement({
-                    type: 'p',
-                    token: ''
-                });
+            pushParIfEmpty();
             renderers.forEach(r => r.txt(currentToken.text));
         },
         blank: () => {
@@ -768,11 +761,14 @@ function texDown(markDown, ...renderers) {
             renderers.forEach(r => r.blank());
         },
         eol: () => {
-            while (elements.length
-                && topElement().type !== 'p'
-                && topElement().type !== 'li')
+            const multiline = ['p', 'li'];
+            const te = topElement();
+            if (te && multiline.includes(te.type)) {
+                renderers.forEach(r => r.eol());
+            }
+            while (stack.length
+                && !multiline.includes(topElement().type))
                 popElement();
-            renderers.forEach(r => r.eol());
         }
     };
     while (true) {
@@ -788,7 +784,7 @@ function texDown(markDown, ...renderers) {
 }
 exports.texDown = texDown;
 
-},{"moo":80}],81:[function(require,module,exports) {
+},{"moo":96}],93:[function(require,module,exports) {
 var define;
 var global = arguments[3];
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -18625,7 +18621,7 @@ module.exports = { "default": __webpack_require__(119), __esModule: true };
 /***/ })
 /******/ ])["default"];
 });
-},{}],13:[function(require,module,exports) {
+},{}],82:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -18654,7 +18650,7 @@ function debounce(f, timeout) {
     };
 }
 exports.debounce = debounce;
-},{}],79:[function(require,module,exports) {
+},{}],94:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18710,7 +18706,7 @@ var AbstractRenderer = function () {
 }();
 
 exports.AbstractRenderer = AbstractRenderer;
-},{"./util":13}],12:[function(require,module,exports) {
+},{"./util":82}],81:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18864,18 +18860,315 @@ var Html = function (_AbstractRenderer_1$A) {
 }(AbstractRenderer_1.AbstractRenderer);
 
 exports.Html = Html;
-},{"katex":81,"./AbstractRenderer":79,"./util":13}],7:[function(require,module,exports) {
+},{"katex":93,"./AbstractRenderer":94,"./util":82}],87:[function(require,module,exports) {
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var AbstractRenderer_1 = require("./AbstractRenderer");
+var util_1 = require("./util");
+var multiline = ['p', 'li'];
+var inline = ['b', 'u', 'i'];
+
+var Syntax = function (_AbstractRenderer_1$A) {
+    _inherits(Syntax, _AbstractRenderer_1$A);
+
+    function Syntax() {
+        _classCallCheck(this, Syntax);
+
+        return _possibleConstructorReturn(this, (Syntax.__proto__ || Object.getPrototypeOf(Syntax)).apply(this, arguments));
+    }
+
+    _createClass(Syntax, [{
+        key: "append",
+        value: function append(type, id) {
+            var el = util_1.e('span', {
+                'data-type': type
+            });
+            if (id) {
+                el.setAttribute('data-sync', String(id));
+            }
+            this.top().appendChild(el);
+            return el;
+        }
+    }, {
+        key: "appendAndSetText",
+        value: function appendAndSetText(type, val, id) {
+            var el = this.append(type, id);
+            el.innerHTML = val;
+            return el;
+        }
+    }, {
+        key: "appendAndPush",
+        value: function appendAndPush(type, id) {
+            var el = this.append(type, id);
+            this.push(el);
+            if (multiline.includes(type)) this.pushLine();
+            return el;
+        }
+    }, {
+        key: "hr",
+        value: function hr() {
+            this.clear();
+            this.appendAndSetText('hr', '--');
+        }
+    }, {
+        key: "pushLine",
+        value: function pushLine() {
+            var div = util_1.e('div');
+            div.dir = 'auto';
+            div.className = 'line';
+            this.push(div);
+        }
+    }, {
+        key: "popLines",
+        value: function popLines() {
+            while (this.top().className === 'line') {
+                this.pop();
+            }
+        }
+    }, {
+        key: "startElement",
+        value: function startElement(e, id) {
+            console.log('<', e.type);
+            var type = e.type;
+            if (!inline.includes(type) && !multiline.includes(type)) {
+                this.pushLine();
+            }
+            this.appendAndPush(type, id);
+            if (e.type === 'li') this.appendAndSetText('-', e.token);
+        }
+    }, {
+        key: "endElement",
+        value: function endElement(e) {
+            console.log(e.type, '>');
+            while (this.top().getAttribute('data-type') !== e.type) {
+                this.pop();
+            }this.pop();
+        }
+    }, {
+        key: "startEnv",
+        value: function startEnv(name) {
+            console.log('<', name);
+            var env = this.appendAndSetText('env-s', "\\" + name);
+            this.top().appendChild(env);
+        }
+    }, {
+        key: "endEnv",
+        value: function endEnv(name) {
+            console.log(name, '>');
+            var env = this.appendAndSetText('env-e', "\\" + name);
+            this.top().appendChild(env);
+        }
+    }, {
+        key: "esc",
+        value: function esc(val) {
+            this.txt(val);
+        }
+    }, {
+        key: "txt",
+        value: function txt(val) {
+            console.log('t', val, val.indexOf('\n'));
+            this.top().appendChild(this.appendAndSetText('', val));
+        }
+    }, {
+        key: "eol",
+        value: function eol() {
+            console.log('eol');
+            this.popLines();
+            this.pushLine();
+        }
+    }, {
+        key: "blank",
+        value: function blank() {
+            this.clear();
+            this.top().appendChild(util_1.e('br'));
+        }
+    }, {
+        key: "a",
+        value: function a(title, href, id) {
+            console.log('a');
+            this.appendAndSetText('a', "[" + title + "](" + href + ")", id);
+        }
+    }, {
+        key: "img",
+        value: function img(title, src, id) {
+            this.appendAndSetText('img', "![" + title + "](" + src + ")", id);
+        }
+    }, {
+        key: "$",
+        value: function $(tex, id) {
+            this.appendAndSetText('$', tex, id);
+        }
+    }, {
+        key: "$$",
+        value: function $$(tex, id) {
+            this.appendAndSetText('$$', tex, id);
+        }
+    }, {
+        key: "tikz",
+        value: function tikz(val, id) {
+            console.log('tikz');
+            this.appendAndSetText('tikz', val, id);
+        }
+    }, {
+        key: "cmd",
+        value: function cmd(name, arg) {
+            this.appendAndSetText('cmd', "\\" + name + "{" + arg + "}");
+        }
+    }]);
+
+    return Syntax;
+}(AbstractRenderer_1.AbstractRenderer);
+
+exports.Syntax = Syntax;
+},{"./AbstractRenderer":94,"./util":82}],88:[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.welcome = encodeURIComponent("\n\n# $\\TeX$.ninja\n\n## Text\n\n- plain\n- *bold*\n- /italic/\n- _underline_\n\n## Lists\n\n1. item 1\n  1. item 1.1\n2. item 2\n\n- item 1\n  - item 1.1\n- item 2\n\n## Math\n\nInline $a \\leq b$ or block:\n\n$$\n\\int \\frac{1}{x}\\;dx = \\ln|x| + C\n$$\n\n## Images\n\n\\center\n![](https://goo.gl/22sw2D)\n\n\\begin{tikzpicture}\n\n\\foreach[count=\\i] \\s in {60,120,...,360}{\n  \\node[draw, circle](\\i) at (\\s:3) {$\\i$};\n}\n\\foreach \\i in {1,...,6}{\n  \\foreach \\j in {1,...,6}{\n    \\draw (\\i) to[bend right] (\\j);\n  }\n}\n\n\\end{tikzpicture}\n\\center\n\n\n--\n\n\\center\n[TeX.ninja](https://tex.ninja) - write $\\LaTeX$ like a Ninja.\n\\center\n\n\n");
+},{}],89:[function(require,module,exports) {
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var util_1 = require("./util");
+var highlight = function highlight(e) {
+    e.className = 'highlight';
+    setTimeout(function () {
+        e.className = '';
+    }, 2000);
+};
+
+var SyncCol = function () {
+    function SyncCol(e, onScroll) {
+        var _this = this;
+
+        _classCallCheck(this, SyncCol);
+
+        this.firstVisibleKid = function () {
+            var scrollTop = _this.e.scrollTop;
+            var kids = _this.e.querySelectorAll('[data-sync]');
+            for (var i = 0; i < kids.length; i++) {
+                var _e = kids.item(i);
+                if (_e.offsetTop > scrollTop) return _e;
+            }
+            return kids.item(kids.length - 1);
+        };
+        this.lastVisibleKid = function () {
+            var scrollTop = _this.e.scrollTop + _this.e.clientHeight;
+            var kids = _this.e.querySelectorAll('[data-sync]');
+            for (var i = 0; i < kids.length; i++) {
+                var _e2 = kids.item(i);
+                if (_e2.offsetTop + _e2.scrollHeight > scrollTop) return kids.item(i - 1);
+            }
+            return kids.item(kids.length - 1);
+        };
+        this.e = e;
+        this.scrollTop = e.scrollTop;
+        this.onScroll = util_1.debounce(function () {
+            var down = _this.scrollTop < _this.e.scrollTop;
+            _this.scrollTop = _this.e.scrollTop;
+            var kid = down ? _this.lastVisibleKid() : _this.firstVisibleKid();
+            highlight(kid);
+            onScroll(parseInt(kid.getAttribute('data-sync')), down);
+        }, 300);
+        e.addEventListener('scroll', util_1.debounce(function () {
+            e.addEventListener('scroll', _this.onScroll);
+        }, 300));
+    }
+
+    _createClass(SyncCol, [{
+        key: "pause",
+        value: function pause() {
+            this.e.removeEventListener('scroll', this.onScroll);
+        }
+    }, {
+        key: "scrollTo",
+        value: function scrollTo(dataSync, down) {
+            var e = this.e.querySelector("[data-sync=\"" + dataSync + "\"]");
+            if (e === null) return;
+            highlight(e);
+            this.pause();
+            e.scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+    }]);
+
+    return SyncCol;
+}();
+
+exports.SyncCol = SyncCol;
+},{"./util":82}],77:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var texdown_1 = require("texdown");
 var Html_1 = require("../Html");
+var Syntax_1 = require("../Syntax");
 var util_1 = require("../util");
+var welcome_1 = require("../welcome");
+var SyncCol_1 = require("../SyncCol");
 document.addEventListener('DOMContentLoaded', function () {
-    var content = document.getElementById('content');
+    var get = function get(id) {
+        return document.getElementById(id);
+    };
+    var input = get('input');
+    var editor = get('editor');
+    var output = get('output');
+    var editorCol = new SyncCol_1.SyncCol(get('lcol'), function (dataSync, down) {
+        viewCol.scrollTo(dataSync, down);
+    });
+    var viewCol = new SyncCol_1.SyncCol(get('rcol'), function (dataSync, down) {
+        editorCol.scrollTo(dataSync, down);
+    });
     var html = new Html_1.Html();
-    texdown_1.texDown(util_1.readHash() + '\n', html);
-    content.appendChild(html.root);
+    var syntax = new Syntax_1.Syntax();
+    var update = function update() {
+        viewCol.pause();
+        syntax.reset();
+        html.reset();
+        var tex = util_1.readHash() + '\n';
+        texdown_1.texDown(tex, html, syntax);
+        requestAnimationFrame(function () {
+            window.parent.postMessage(tex, '*');
+            editor.innerHTML = '';
+            editor.appendChild(syntax.root);
+            output.innerHTML = '';
+            output.appendChild(html.root);
+            input.style.height = editor.scrollHeight + 40 + 'px';
+        });
+    };
+    input.addEventListener('keydown', function (e) {
+        if (e.keyCode !== 9) return;
+        var start = input.selectionStart;
+        var end = input.selectionEnd;
+        var value = input.value;
+        var space = '  ';
+        input.value = value.substring(0, start) + space + value.substring(end);
+        input.selectionStart = input.selectionEnd = start + space.length;
+        e.preventDefault();
+        window.location.hash = encodeURIComponent(input.value);
+    });
+    input.addEventListener('input', function () {
+        window.location.hash = encodeURIComponent(input.value);
+    });
+    if (window.location.hash.length <= 1) window.location.hash = welcome_1.welcome;
+    input.value = util_1.readHash();
+    editor.focus();
+    window.onhashchange = update;
+    update();
 });
-},{"texdown":78,"../Html":12,"../util":13}]},{},[7], null)
-//# sourceMappingURL=/view.17a323e1.map
+},{"texdown":85,"../Html":81,"../Syntax":87,"../util":82,"../welcome":88,"../SyncCol":89}]},{},[77], null)
+//# sourceMappingURL=/edit.946c1697.map

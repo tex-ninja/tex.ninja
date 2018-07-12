@@ -66,6 +66,7 @@ textarea#input,
   white-space: pre-wrap; }
 
 [data-type=''],
+[data-type='-'],
 [data-type='b'],
 [data-type='i'],
 [data-type='u'],
@@ -80,50 +81,71 @@ textarea#input,
 
 [data-type^='h'] {
   color: black; }
-  [data-type^='h'] > .token {
-    color: orange; }
-
-[data-type='ul'] > .token,
-[data-type='li'] > .token {
-  color: orange; }
+  [data-type^='h']::before {
+    color: red; }
 
 [data-type='$']::before, [data-type='$']::after {
   content: '$';
-  color: orange; }
+  color: red; }
 
 [data-type='$$']::before, [data-type='$$']::after {
   content: '$$';
-  color: orange; }
+  color: red; }
 
 [data-type='$'],
 [data-type='$$'] {
-  color: turquoise; }
+  color: green; }
 
 [data-type='tikz'] {
-  color: darkgreen; }
+  color: aqua; }
 
+[data-type^='env'],
 [data-type='cmd'] {
-  color: darkred; }
-
-[data-type^='env'] {
-  color: darkred; }
+  color: yellow; }
 
 [data-type='env-e'] {
   text-decoration: line-through; }
+
+[data-type='-'] {
+  color: purple; }
 
 [data-type='a'] {
   color: blue; }
 
 [data-type='img'] {
-  color: coral; }
+  color: fuchsia; }
 
 [data-type='b'] {
   color: black; }
-
-[data-type='i'] {
-  font-style: italic; }
+  [data-type='b']::before, [data-type='b']::after {
+    content: '*'; }
 
 [data-type='u'] {
   text-decoration: underline; }
+  [data-type='u']::before, [data-type='u']::after {
+    content: '_'; }
+
+[data-type='i'] {
+  font-style: italic; }
+  [data-type='i']::before, [data-type='i']::after {
+    content: '/'; }
+
+[data-type='h1']::before {
+  content: '# '; }
+
+[data-type='h2']::before {
+  content: '## '; }
+
+[data-type='h3']::before {
+  content: '### '; }
+
+[data-type='h4']::before {
+  content: '#### '; }
+
+[data-type='h5']::before {
+  content: '##### '; }
+
+[data-type='h6']::before {
+  content: '###### '; }
 
 /*# sourceMappingURL=index.css.map */
