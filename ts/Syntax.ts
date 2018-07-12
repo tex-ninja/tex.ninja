@@ -42,32 +42,32 @@ export class Syntax extends AbstractRenderer {
     }
 
 
-    private pushLine() {
+    private pushDirAutoBlock() {
         const div = e('div')
         div.dir = 'auto'
-        div.className = 'line'
+        div.className = 'dir-auto'
         this.push(div)
     }
 
     startElement(e: Element, id: number) {
         if (!['b', 'i', 'u'].includes(e.type)) {
-            this.pushLine()
+            this.pushDirAutoBlock()
         }
         const type = e.type
         const el = this.dataType(type, e.token, id)
         this.push(el)
     }
 
-    private popLine() {
-        if (this.top().className === 'line') this.pop()
+    private popDirAutoBlocks() {
+        while (this.top().className === 'dir-auto') this.pop()
     }
 
     endElement(e: Element) {
         if (!['li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(e.type)) {
             this.top().appendChild(this.token(e.token))
         }
-        this.popLine()
         this.pop()
+        this.popDirAutoBlocks()
     }
 
     startEnv(type: Env): void {
@@ -89,8 +89,8 @@ export class Syntax extends AbstractRenderer {
     }
 
     eol() {
-        this.popLine()
-        this.pushLine()
+        this.popDirAutoBlocks()
+        this.pushDirAutoBlock()
     }
 
     blank() {
@@ -113,6 +113,7 @@ export class Syntax extends AbstractRenderer {
     }
 
     $$(tex: string, id: number) {
+        this.pushDirAutoBlock()
         const $$ = this.dataType('$$', tex, id)
         this.top().appendChild($$)
     }
