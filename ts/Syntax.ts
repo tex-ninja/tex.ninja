@@ -42,17 +42,31 @@ export class Syntax extends AbstractRenderer {
     }
 
 
+    private pushLine() {
+        const div = e('div')
+        div.dir = 'auto'
+        div.className = 'line'
+        this.push(div)
+    }
+
     startElement(e: Element, id: number) {
+        if (!['b', 'i', 'u'].includes(e.type)) {
+            this.pushLine()
+        }
         const type = e.type
-        console.log(e)
         const el = this.dataType(type, e.token, id)
         this.push(el)
+    }
+
+    private popLine() {
+        if (this.top().className === 'line') this.pop()
     }
 
     endElement(e: Element) {
         if (!['li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(e.type)) {
             this.top().appendChild(this.token(e.token))
         }
+        this.popLine()
         this.pop()
     }
 
@@ -71,16 +85,13 @@ export class Syntax extends AbstractRenderer {
     }
 
     txt(val: string) {
-        const txt = this.dataType('', val)
-        txt.innerText = val
-        this.top().appendChild(txt)
+        console.log('txt', val)
+        this.top().appendChild(this.dataType('', val))
     }
 
     eol() {
-        if (['li', 'p'].includes(
-            String(this.top().getAttribute('data-type')))) {
-            this.blank()
-        }
+        this.popLine()
+        this.pushLine()
     }
 
     blank() {

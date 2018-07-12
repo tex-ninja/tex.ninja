@@ -27,7 +27,6 @@ $color-tikz: darkgreen;
 
 [data-type^='h'] {
     color: black;
-    font-weight: bold;
     >.token {
         color: $color-special-char;
     }
@@ -87,7 +86,6 @@ $color-tikz: darkgreen;
 
 [data-type='b'] {
     color: black;
-    font-weight: bold;
 }
 
 [data-type='i'] {
