@@ -101,7 +101,7 @@ textarea#input,
 
 [data-type^='env'],
 [data-type='cmd'] {
-  color: yellow; }
+  color: fuchsia; }
 
 [data-type='env-e'] {
   text-decoration: line-through; }
@@ -113,7 +113,7 @@ textarea#input,
   color: blue; }
 
 [data-type='img'] {
-  color: fuchsia; }
+  color: yellow; }
 
 [data-type='b'] {
   color: black; }
