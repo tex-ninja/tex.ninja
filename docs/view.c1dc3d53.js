@@ -98,7 +98,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   // Override the current require with this new one
   return newRequire;
-})({81:[function(require,module,exports) {
+})({90:[function(require,module,exports) {
 var define;
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -563,7 +563,7 @@ var define;
 
 }))
 
-},{}],77:[function(require,module,exports) {
+},{}],79:[function(require,module,exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const moo = require("moo");
@@ -761,14 +761,16 @@ function texDown(markDown, ...renderers) {
             renderers.forEach(r => r.blank());
         },
         eol: () => {
+            console.log('texdown', 'eol');
             const multiline = ['p', 'li'];
-            const te = topElement();
-            if (te && multiline.includes(te.type)) {
-                renderers.forEach(r => r.eol());
-            }
             while (stack.length
                 && !multiline.includes(topElement().type))
                 popElement();
+            const te = topElement();
+            console.log('texdown', te);
+            if (te && multiline.includes(te.type)) {
+                renderers.forEach(r => r.eol());
+            }
         }
     };
     while (true) {
@@ -784,7 +786,7 @@ function texDown(markDown, ...renderers) {
 }
 exports.texDown = texDown;
 
-},{"moo":81}],78:[function(require,module,exports) {
+},{"moo":90}],86:[function(require,module,exports) {
 var define;
 var global = arguments[3];
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -18621,7 +18623,7 @@ module.exports = { "default": __webpack_require__(119), __esModule: true };
 /***/ })
 /******/ ])["default"];
 });
-},{}],13:[function(require,module,exports) {
+},{}],75:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -18650,7 +18652,7 @@ function debounce(f, timeout) {
     };
 }
 exports.debounce = debounce;
-},{}],79:[function(require,module,exports) {
+},{}],87:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18706,7 +18708,7 @@ var AbstractRenderer = function () {
 }();
 
 exports.AbstractRenderer = AbstractRenderer;
-},{"./util":13}],12:[function(require,module,exports) {
+},{"./util":75}],74:[function(require,module,exports) {
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -18860,7 +18862,7 @@ var Html = function (_AbstractRenderer_1$A) {
 }(AbstractRenderer_1.AbstractRenderer);
 
 exports.Html = Html;
-},{"katex":78,"./AbstractRenderer":79,"./util":13}],7:[function(require,module,exports) {
+},{"katex":86,"./AbstractRenderer":87,"./util":75}],7:[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -18873,5 +18875,5 @@ document.addEventListener('DOMContentLoaded', function () {
     texdown_1.texDown(util_1.readHash() + '\n', html);
     content.appendChild(html.root);
 });
-},{"texdown":77,"../Html":12,"../util":13}]},{},[7], null)
-//# sourceMappingURL=/view.fd06c24b.map
+},{"texdown":79,"../Html":74,"../util":75}]},{},[7], null)
+//# sourceMappingURL=/view.c1dc3d53.map

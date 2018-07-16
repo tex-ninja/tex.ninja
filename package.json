@@ -15,7 +15,7 @@
     },
     "dependencies": {
         "katex": "^0.10.0-beta",
-        "texdown": "^2.0.1"
+        "texdown": "^2.0.2"
     },
     "scripts": {}
 }
