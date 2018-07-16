@@ -1,5 +1,5 @@
 import * as katex from "katex";
-import { Element, Env } from "texdown";
+import { Element } from "texdown";
 import { AbstractRenderer } from "./AbstractRenderer";
 import { debounce, e } from "./util";
 
@@ -12,11 +12,11 @@ export class Html extends AbstractRenderer {
         }))
     }
 
-    startEnv(type: Env): void {
+    startEnv(name: string): void {
         this.push(e('div', { align: 'center' }))
     }
 
-    endEnv(type: Env): void {
+    endEnv(name: string): void {
         while (this.top().tagName === 'p')
             this.pop()
         this.pop()

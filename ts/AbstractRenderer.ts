@@ -1,9 +1,9 @@
-import { Element, Env, Renderer, ElementType } from "texdown";
+import { Element, Renderer, ElementType } from "texdown";
 import { e } from "./util";
 
 export abstract class AbstractRenderer implements Renderer {
-    abstract startEnv(type: Env): void
-    abstract endEnv(type: Env): void
+    abstract startEnv(name: string): void
+    abstract endEnv(name: string): void
     abstract hr(): void
     abstract startElement(type: Element, id: number): void
     abstract endElement(type: Element): void
